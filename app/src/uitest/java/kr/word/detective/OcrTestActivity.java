@@ -25,6 +25,7 @@ public class OcrTestActivity extends Activity {
             if (words == null) { page.addView(Ui.note(this, "FAILED " + why)); return; }
             page.addView(Ui.note(this, "words " + words.size()));
             for (Word w : words) page.addView(Ui.text(this, w.en + " = " + w.ko, 13, false, Ui.INK));
+            for (String l : kr.word.detective.core.Lines.lastLines) page.addView(Ui.text(this, "raw: " + l, 11, false, Ui.SUB));
         });
     }
 }

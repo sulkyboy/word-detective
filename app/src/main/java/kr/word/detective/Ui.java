@@ -262,9 +262,8 @@ final class Ui {
         e.setTextSize(17);
         e.setTextColor(INK);
         e.setSingleLine(true);
-        e.setInputType(english
-                ? InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-                : InputType.TYPE_CLASS_TEXT);
+        // 영어 칸은 자동 고침·추천 낱말이 답을 알려 주지 않게 끈다
+        e.setInputType(english ? InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS : InputType.TYPE_CLASS_TEXT);
         GradientDrawable g = round(c, CARD, 10);
         g.setStroke(dp(c, 1), LINE);
         e.setBackground(g);

@@ -16,6 +16,10 @@ public class T {
         eq("next line", "library=도서관|", show(Lines.fromText("library\n도서관\n")));
         eq("phrase", "get up=일어나다|ice cream=아이스크림|", show(Lines.fromText("get up : 일어나다\nice cream - 아이스크림")));
         eq("header ignored", "book=책|", show(Lines.fromText("단어   뜻\nbook 책")));
+        eq("garbled pron", "beautiful=아름다운|remember=기억하다|different=다른|", show(Lines.fromText("2 beautiful (bjuMtfXl) 아름다운\n6 remember [rimembrl 기억하다\n9 different [difXrXnt) 다른")));
+        eq("title line", "apple=사과|", show(Lines.fromText("Day 1 영단어 테스트\n1 apple 사과")));
+        eq("paren meaning", "drink=(물을) 마시다|", show(Lines.fromText("drink (물을) 마시다")));
+        eq("korean only", "", show(Lines.fromText("이름:      반:")));
         eq("dup", "book=책|", show(Lines.fromText("book 책\nBook 책")));
         // 사진: 영어 칸과 뜻 칸이 따로 읽힌 경우
         List<Lines.Box> bx = new ArrayList<Lines.Box>();

@@ -183,10 +183,9 @@ start RecordActivity;    shot 16_record
 swipe_up;                shot 17_record_bottom 1.5
 start SettingsActivity;  shot 18_settings
 swipe_up;                shot 19_settings_bottom 1.5
-tap "시간 제한 두기 (번개 사건: 한 문제 20초, 스펠링 30초)"; sleep 1
 adb shell input keyevent KEYCODE_BACK
 
-# ---- 3) 공부 한 판 (시간 제한 켠 상태): 문제 종류가 섞여 나오므로 화면마다 찍으면서 끝까지 간다
+# ---- 3) 공부 한 판: 문제 종류가 섞여 나오므로 화면마다 찍으면서 끝까지 간다
 adb shell pm grant $PKG android.permission.RECORD_AUDIO
 start StudyActivity
 n=0

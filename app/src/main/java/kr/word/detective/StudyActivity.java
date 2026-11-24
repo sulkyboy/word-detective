@@ -39,7 +39,7 @@ public class StudyActivity extends SubActivity {
 
     // 지금 문제의 상태
     private int spokenIdx = -1, timedIdx = -1;
-    private boolean answered, lastRight, hinted, showChoices, listening, lastByVoice;
+    private boolean answered, lastRight, hinted, showChoices, listening, timedOut;
     private int voiceTries, lastGain, pendingVoice;
     private String note, heardText, draft = "";
     private EditText typed;
@@ -53,7 +53,7 @@ public class StudyActivity extends SubActivity {
         public void run() {
             if (answered || isFinishing()) return;
             if (!listening) timeLeft--;      // 듣는 동안에는 시간을 멈춘다
-            if (timeLeft <= 0) { note = "시간이 다 됐어요!"; answer(false, false); return; }
+            if (timeLeft <= 0) { timedOut = true; answer(false, false); return; }
             if (timerText != null) timerText.setText("남은 시간 " + timeLeft + "초");
             handler.postDelayed(this, 1000);
         }
@@ -222,7 +222,7 @@ public class StudyActivity extends SubActivity {
         if (lastRight) {
             Ui.say(page, R.drawable.ch_detective, hero(), "정답! 단서 " + lastGain + "개를 찾았다!", Ui.GOOD);
         } else {
-            String said = heardText != null ? "(\"" + heardText + "\" 라고 들렸어요)  " : "";
+            String said = heardText != null ? "(\"" + heardText + "\" 라고 들렸어요)  " : timedOut ? "시간이 다 됐어요!  " : "";
             Ui.say(page, R.drawable.ch_helper, "괴도의 조력자", said + "호호, 아쉽네요~ 정답은 이거랍니다. 조금 뒤에 한 번 더 나올 거예요.", Ui.DANGER);
         }
         LinearLayout ans = Ui.card(page);
@@ -276,7 +276,7 @@ public class StudyActivity extends SubActivity {
         speaker.stop();
         handler.removeCallbacks(tick);
         idx++;
-        answered = lastRight = hinted = showChoices = listening = lastByVoice = false;
+        answered = lastRight = hinted = showChoices = listening = timedOut = false;
         voiceTries = 0;
         note = heardText = null;
         draft = "";

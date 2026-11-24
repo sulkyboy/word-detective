@@ -61,34 +61,50 @@ public final class Lines {
         return fromLines(lines);
     }
 
-    // 영어 덩어리 다음에 한글이 든 덩어리가 오는 모양을 줄 안에서 차례로 찾는다 (한 줄에 두 짝이 있어도 됨)
-    private static final Pattern PAIR = Pattern.compile("([A-Za-z][A-Za-z '\\-]*)([^A-Za-z]*[\\uAC00-\\uD7A3][^A-Za-z]*)");
+    /** 마지막으로 사진에서 모은 줄들 (시험 화면에서 확인용) */
+    public static List<String> lastLines = new ArrayList<String>();
+
+    // 단어장 맨 위에 흔히 있는 제목 줄의 첫 낱말
+    private static final String HEADERS = "|day|unit|lesson|chapter|part|step|name|class|date|score|no|word|words|test|voca|vocabulary|english|korean|meaning|";
 
     static List<Word> fromLines(List<String> lines) {
+        lastLines = new ArrayList<String>(lines);
         List<Word> out = new ArrayList<Word>();
         Word open = null;   // 뜻이 아직 없는 단어 (뜻이 다음 줄에 있는 경우)
         for (String raw : lines) {
             String line = clean(raw);
             if (line.isEmpty()) continue;
-            boolean hasHangul = line.matches(".*[\\uAC00-\\uD7A3].*");
-            boolean hasLatin = line.matches(".*[A-Za-z]{2,}.*") || line.matches("(?i)\\s*(a|i)\\s*");
-            if (hasHangul && hasLatin) {
-                Matcher m = PAIR.matcher(line);
-                boolean any = false;
-                while (m.find()) {
-                    String en = english(m.group(1)), ko = korean(m.group(2));
-                    if (en.isEmpty() || ko.isEmpty()) continue;
-                    out.add(new Word(en, ko));
-                    any = true;
+            boolean any = false;
+            // 한 줄에서 '영어 … 뜻' 을 차례로 떼어 낸다 (한 줄에 두 짝이 있어도 됨)
+            String rest = line;
+            while (!rest.isEmpty()) {
+                int[] head = headWord(rest);
+                if (head == null) break;
+                String en = english(rest.substring(head[0], head[1]));
+                String after = rest.substring(head[1]);
+                int h = firstHangul(after);
+                if (h < 0) {
+                    // 뜻이 없는 줄: 영어만 있는 줄이면 다음 줄의 뜻을 기다린다
+                    if (!any && !en.isEmpty() && !isHeader(en) && firstHangul(rest) < 0) {
+                        open = new Word(en, "");
+                        out.add(open);
+                        any = true;
+                    }
+                    break;
                 }
-                if (any) { open = null; continue; }
+                // 영어와 뜻 사이(발음기호·품사가 잘못 읽힌 글자)는 버린다. 뜻은 다음 영어 낱말이 나오기 전까지
+                if (h > 0 && after.charAt(h - 1) == '(') h--;     // "(물을) 마시다" 의 여는 괄호는 뜻의 일부
+                String tail = after.substring(h);
+                int next = nextPair(tail);
+                String ko = korean(next < 0 ? tail : tail.substring(0, next));
+                if (!en.isEmpty() && !ko.isEmpty() && !isHeader(en)) {
+                    out.add(new Word(en, ko));
+                    open = null;
+                }
+                any = true;
+                rest = next < 0 ? "" : tail.substring(next);
             }
-            if (hasLatin && !hasHangul) {
-                String en = english(line);
-                if (en.isEmpty()) continue;
-                open = new Word(en, "");
-                out.add(open);
-            } else if (hasHangul && open != null) {
+            if (!any && open != null && firstHangul(line) >= 0 && headWord(line) == null) {
                 open.ko = korean(line);
                 open = null;
             }
@@ -103,10 +119,49 @@ public final class Lines {
         return uniq;
     }
 
+    private static boolean isHeader(String en) {
+        String first = en.toLowerCase(java.util.Locale.US).split(" ")[0];
+        return HEADERS.contains("|" + first + "|");
+    }
+
+    private static boolean latin(char c) { return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'); }
+    private static boolean hangul(char c) { return c >= 0xAC00 && c <= 0xD7A3; }
+
+    private static int firstHangul(String s) {
+        for (int i = 0; i < s.length(); i++) if (hangul(s.charAt(i))) return i;
+        return -1;
+    }
+
+    /** 줄 맨 앞의 영어 낱말(띄어 쓴 숙어 포함)의 {시작, 끝}. 한글이 먼저 나오면 null */
+    private static int[] headWord(String s) {
+        int i = 0;
+        while (i < s.length() && !latin(s.charAt(i))) {
+            if (hangul(s.charAt(i))) return null;
+            i++;
+        }
+        if (i >= s.length()) return null;
+        int j = i;
+        while (j < s.length()) {
+            char c = s.charAt(j);
+            if (latin(c) || c == ' ' || c == '\'' || c == '-') j++; else break;
+        }
+        return new int[] {i, j};
+    }
+
+    /** 뜻 뒤에 또 다른 '영어 … 뜻' 이 이어지면 그 시작 위치, 아니면 -1 */
+    private static int nextPair(String tail) {
+        Matcher m = Pattern.compile("\\s[A-Za-z]{2,}").matcher(tail);
+        while (m.find()) {
+            if (firstHangul(tail.substring(m.end())) >= 0) return m.start() + 1;
+        }
+        return -1;
+    }
+
     /** 번호, 발음기호, 체크 표시 따위를 지운다 */
     static String clean(String s) {
         String t = s.replace('\t', ' ').replace('|', ' ');
         t = t.replaceAll("\\[[^\\]]*\\]|/[^/]*/", " ");                 // [ǽpl], /æpl/
+        t = t.replaceAll("\\([^\\)\\uAC00-\\uD7A3]*\\)", " ");            // (ǽpl) — 한글이 든 괄호는 뜻이므로 둔다
         t = t.replaceAll("^\\s*[\\(\\[]?\\d{1,4}[\\)\\].:]?\\s+", "");   // 1.  (2)  03
         t = t.replaceAll("^[\\s□■☐✓✔●○•·\\-*]+", "");
         return t.trim();
@@ -124,7 +179,7 @@ public final class Lines {
     }
 
     static String korean(String s) {
-        String t = s.replaceAll("^[\\s\\.:=\\-–—>~]+", "").replaceAll("[\\s\\.:=\\-–—,;]+$", "");
+        String t = s.replaceAll("^[\\s\\.:=\\-–—>~\\)\\]]+", "").replaceAll("[\\s\\.:=\\-–—,;]+$", "");
         return t.replaceAll("\\s+", " ").trim();
     }
 }
