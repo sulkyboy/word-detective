@@ -140,7 +140,11 @@ start() { adb shell am start -W -n $PKG/.$1 "${@:2}" >/dev/null; }
 swipe_up() { adb shell input swipe 540 1900 540 ${1:-700} 400; }
 has() { grep -q "text=\"$1\"" "$OUT/ui.xml"; }
 
-TODAY=$(( ($(date +%s) + $(adb shell date +%z | tr -d '\r' | sed -E 's/^([+-])([0-9]{2})([0-9]{2})$/\1(\2*3600+\3*60)/' | bc)) / 86400 ))
+TODAY=$(python3 -c "
+import sys, time
+z = sys.argv[1].strip() or '+0000'
+off = (int(z[1:3]) * 3600 + int(z[3:5]) * 60) * (-1 if z[0] == '-' else 1)
+print((int(time.time()) + off) // 86400)" "$(adb shell date +%z | tr -d '\r')")
 python3 - "$TODAY" > "$OUT/seed.json" <<'PY'
 import json, sys
 t = int(sys.argv[1])
