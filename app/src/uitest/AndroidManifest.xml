@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 화면 확인용 빌드(-PuiTest)에만 들어가는 시험 화면. 평소 설치 파일에는 없다. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity android:name=".OcrTestActivity" android:exported="true" android:label="글자 인식 시험" />
+    </application>
+</manifest>
