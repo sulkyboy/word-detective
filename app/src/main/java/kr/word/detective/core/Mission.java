@@ -1,7 +1,7 @@
 package kr.word.detective.core;
 
 /**
- * 괴도의 요구(과제). 괴도아빠와 괴도엄마는 "이것만 하면 쪼코를 풀어 준다"고 하지만,
+ * 괴도의 요구(과제). 괴도아빠와 괴도엄마는 "이것만 하면 쪼꼬를 풀어 준다"고 하지만,
  * 해내면 핑계를 대고 다음 요구를 내놓는다. 그래서 요구는 끝없이 이어진다.
  *   0번째: 단어장 사진 찍기 → 1번째: 도전장 한 판 → 2번째: 단서 100개 → 그 뒤로는 다섯 가지가 돌아가며 나온다.
  */
@@ -12,6 +12,13 @@ public final class Mission {
     private static final int[] CYCLE = {SOLVE, UNSOLVED, MATCH, MASTER, POINTS};
     /** 요구를 하나 들어줄 때마다 받는 단서 (속았지만 빈손은 아니게) */
     public static final int BONUS = 20;
+    /** 도전장 한 판에서 이만큼(%) 이상 맞히면 쪼꼬를 잠깐 만나게 해 준다 */
+    public static final int MEET_PERCENT = 80;
+
+    /** 이번 판 성적으로 쪼꼬를 만날 수 있는지 (문제가 너무 적으면 안 됨) */
+    public static boolean canMeet(int asked, int right) {
+        return asked >= 3 && right * 100 >= asked * MEET_PERCENT;
+    }
 
     public static int type(int stage) {
         if (stage <= 0) return PHOTO;
@@ -93,7 +100,7 @@ public final class Mission {
     public static String demand(int stage) {
         int n = need(stage);
         switch (type(stage)) {
-            case PHOTO: return "쪼코를 찾고 싶으면 단어장 사진을 찍어 오너라! 그러면 바로 풀어 주마.";
+            case PHOTO: return "쪼꼬를 찾고 싶으면 단어장 사진을 찍어 오너라! 그러면 바로 풀어 주마.";
             case SOLVE: return stage == 1 ? "내 도전장을 한 판 끝내 보거라. 그러면 이번엔 진짜 풀어 주마!"
                     : "도전장을 " + n + "판 더 끝내 오너라. 그러면 꼭 풀어 주마!";
             case POINTS: return "단서를 " + n + "개 더 모아 오너라. 이번엔 진짜다!";
@@ -109,9 +116,9 @@ public final class Mission {
             case PHOTO: return "사진은 제법 잘 찍어 왔군. 하지만 찍기만 하고 외우지 않으면 무슨 소용이지?";
             case SOLVE: return stage == 1 ? "한 판 풀었다고? 흥, 그 정도는 누구나 한다!" : "두 판이나 풀었군. 하지만 내 눈엔 아직 부족하다!";
             case POINTS: return "단서를 다 모아 왔군… 그런데 내가 '오늘' 풀어 준다고 했던가?";
-            case UNSOLVED: return "미해결 사건을 다 풀었다고? 음… 쪼코가 여기가 더 좋다는구나!";
+            case UNSOLVED: return "미해결 사건을 다 풀었다고? 음… 쪼꼬가 여기가 더 좋다는구나!";
             case MATCH: return "짝 맞추기는 재미있었나? 재미있었으면 그건 놀이지!";
-            default: return "단어를 제법 외웠군. 하지만 쪼코 간식값이 아직 모자란다!";
+            default: return "단어를 제법 외웠군. 하지만 쪼꼬 간식값이 아직 모자란다!";
         }
     }
 }

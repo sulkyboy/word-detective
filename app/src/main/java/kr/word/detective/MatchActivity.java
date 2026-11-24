@@ -66,7 +66,7 @@ public class MatchActivity extends SubActivity {
         LinearLayout page = Ui.page(this);
         cards.clear();
         if (texts.size() < 4) {
-            Ui.say(page, R.drawable.ch_jjoko, "쪼코", "짝 맞추기는 단어가 2개 이상 있어야 할 수 있어요.", Ui.ACCENT);
+            Ui.say(page, R.drawable.ch_jjoko, "쪼꼬", "짝 맞추기는 단어가 2개 이상 있어야 할 수 있어요.", Ui.ACCENT);
             Ui.button(page, "돌아가기", Ui.BTN_PLAIN, this::finish);
             return;
         }

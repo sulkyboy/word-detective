@@ -168,7 +168,7 @@ start HomeActivity;      shot 00_intro_scene0 1.5
 shot 00_intro_scene0b 1;  shot 00_intro_scene1 2.5;  shot 00_intro_scene2 2.5
 adb shell input tap 540 900;  shot 00_intro_scene3 2.5        # 무대를 누르면 다음 장면
 tap "다음  ▶";            shot 00_intro_scene4 1.5
-tap "쪼코 찾으러 가기!";  shot 01_first_run 3
+tap "쪼꼬 찾으러 가기!";  shot 01_first_run 3
 adb shell input text "Jiu"; tap "정했어요";  shot 02_home_empty 2
 start DecksActivity;     shot 03_decks_empty
 tap "직접 입력하거나 붙여넣기";            shot 04_type_in 2
@@ -215,8 +215,8 @@ for k, v in pairs.items():
 print(ans)
 PY
     tap "$(cat "$OUT/pick.txt")"
-  elif has "쪼코에게 힌트 받기" && [ $((step % 2)) -eq 0 ]; then
-    tap "쪼코에게 힌트 받기"; n=$((n+1)); shot "20_study_$(printf %02d $n)" 1.5; tap "모르겠어요"
+  elif has "쪼꼬에게 힌트 받기" && [ $((step % 2)) -eq 0 ]; then
+    tap "쪼꼬에게 힌트 받기"; n=$((n+1)); shot "20_study_$(printf %02d $n)" 1.5; tap "모르겠어요"
   else tap "모르겠어요"
   fi
 done
@@ -251,6 +251,14 @@ tap "다음  ▶";           shot 63_trick_scene1 2
 tap "다음  ▶";           shot 64_trick_scene2 2.5
 tap "좋아, 이번엔 꼭!";  shot 65_home_next_demand 2.5
 rm -f "$OUT/seed_intro.json" "$OUT/seed_trick.json"
+
+# ---- 5c) 면회 장면 (80% 이상 맞혔을 때)
+seed "$OUT/seed.json"
+start IntroActivity --ez meet true;  shot 66_meet_scene0 2
+adb shell input tap 540 900;         shot 67_meet_scene1 2.5
+adb shell input tap 540 900;         shot 68_meet_scene2 1.2
+shot 68b_meet_scene2_after 2
+adb shell input keyevent KEYCODE_BACK
 
 # ---- 6) 글자 인식: 시험용 단어장 그림을 실제 인식에 넣어 본다
 adb shell mkdir -p /sdcard/Android/data/$PKG/files

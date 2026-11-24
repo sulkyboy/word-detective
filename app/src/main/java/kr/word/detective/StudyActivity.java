@@ -29,7 +29,7 @@ import kr.word.detective.core.Word;
 /**
  * 괴도의 도전장: 단어 공부 한 판(= 사건 하나).
  * 괴도아빠가 세 가지로 섞어서 묻는다 — 영어를 들려주고 뜻 묻기, 뜻을 말해 주고 영어 묻기, 스펠링 묻기.
- * 답은 말로 하거나, 글자로 쓰거나, 보기에서 고른다. 처음 보는 단어는 쪼코가 단서 카드로 먼저 보여 준다.
+ * 답은 말로 하거나, 글자로 쓰거나, 보기에서 고른다. 처음 보는 단어는 쪼꼬가 단서 카드로 먼저 보여 준다.
  */
 public class StudyActivity extends SubActivity {
     private Data d;
@@ -41,6 +41,7 @@ public class StudyActivity extends SubActivity {
     // 지금 문제의 상태
     private int spokenIdx = -1, timedIdx = -1;
     private boolean answered, lastRight, hinted, showChoices, listening, timedOut;
+    private boolean meetShown;    // 이번 판의 면회 장면을 이미 띄웠는지
     private int voiceTries, lastGain, pendingVoice;
     private String note, heardText, draft = "";
     private EditText typed;
@@ -102,7 +103,7 @@ public class StudyActivity extends SubActivity {
         LinearLayout page = Ui.page(this);
 
         if (qs.isEmpty()) {
-            Ui.say(page, R.drawable.ch_jjoko, "쪼코", "지금은 풀 단어가 없어요. 사건 파일에서 단어장을 만들거나 뜻을 채워 주세요!", Ui.ACCENT);
+            Ui.say(page, R.drawable.ch_jjoko, "쪼꼬", "지금은 풀 단어가 없어요. 사건 파일에서 단어장을 만들거나 뜻을 채워 주세요!", Ui.ACCENT);
             Ui.button(page, "돌아가기", Ui.BTN_PLAIN, this::finish);
             return;
         }
@@ -159,7 +160,7 @@ public class StudyActivity extends SubActivity {
         }
 
         if (listening) {
-            Ui.say(page, R.drawable.ch_jjoko, "쪼코가 몰래 보낸 쪽지", "듣고 있어요. 또박또박 말해 주세요!", Ui.ACCENT);
+            Ui.say(page, R.drawable.ch_jjoko, "쪼꼬가 몰래 보낸 쪽지", "듣고 있어요. 또박또박 말해 주세요!", Ui.ACCENT);
             Ui.button(page, "그만 듣기", Ui.BTN_PLAIN, () -> { listener.cancel(); listening = false; render(); });
             return;
         }
@@ -190,17 +191,17 @@ public class StudyActivity extends SubActivity {
 
         LinearLayout tools = Ui.line(this);
         tools.setGravity(Gravity.CENTER);
-        tools.addView(Ui.chip(this, hinted ? "힌트: " + Quiz.hint(q) : "쪼코의 비밀 쪽지 (힌트)", false, () -> { hinted = true; render(); }));
+        tools.addView(Ui.chip(this, hinted ? "힌트: " + Quiz.hint(q) : "쪼꼬의 비밀 쪽지 (힌트)", false, () -> { hinted = true; render(); }));
         tools.addView(Ui.chip(this, "모르겠어요", false, () -> answer(false, false)), Ui.after(this, 8));
         page.addView(tools, Ui.below(this, 14));
     }
 
     private TextView center(TextView t) { t.setGravity(Gravity.CENTER); return t; }
 
-    /** 처음 보는 단어: 쪼코가 물어 온 단서 카드 */
+    /** 처음 보는 단어: 쪼꼬가 물어 온 단서 카드 */
     private void renderIntro(LinearLayout page, final Quiz.Q q) {
         final Word w = q.word;
-        Ui.say(page, R.drawable.ch_jjoko, "쪼코가 몰래 보낸 쪽지", "멍! 새 단서 카드예요. 괴도아빠가 곧 물어볼 테니 잘 봐 두세요!", Ui.ACCENT);
+        Ui.say(page, R.drawable.ch_jjoko, "쪼꼬가 몰래 보낸 쪽지", "멍! 새 단서 카드예요. 괴도아빠가 곧 물어볼 테니 잘 봐 두세요!", Ui.ACCENT);
         LinearLayout card = Ui.card(page);
         card.addView(Ui.big(this, w.en, 36, Ui.INK));
         card.addView(Ui.big(this, w.ko, 22, Ui.ACCENT), Ui.below(this, 8));
@@ -250,7 +251,7 @@ public class StudyActivity extends SubActivity {
         col.addView(Ui.text(this, "문제 " + asked + "개 중 " + right + "개 정답", 17, true, Ui.INK));
         col.addView(Ui.text(this, "찾은 단서 +" + earned + "개  (모두 " + d.points + "개)", 14, true, 0xFFB57F00));
         col.addView(Ui.text(this, "연속 출석 " + d.liveStreak(today) + "일", 14, false, Ui.SUB));
-        col.addView(Ui.text(this, Mission.done(d) ? "괴도의 요구를 해냈다! 쪼코를 풀어 달라고 하자" : "괴도의 요구: " + Mission.task(d.stage), 14, true, Ui.DANGER));
+        col.addView(Ui.text(this, Mission.done(d) ? "괴도의 요구를 해냈다! 쪼꼬를 풀어 달라고 하자" : "괴도의 요구: " + Mission.task(d.stage), 14, true, Ui.DANGER));
         LinearLayout.LayoutParams lp = Ui.fill();
         lp.leftMargin = Ui.dp(this, 10);
         row.addView(col, lp);
@@ -261,8 +262,18 @@ public class StudyActivity extends SubActivity {
             Ui.bar(card, Rank.progress(d.points), Ui.GOLD);
             if (Rank.toNext(d.points) > 0) card.addView(Ui.note(this, "'" + Rank.nextName(d.points) + "'까지 단서 " + Rank.toNext(d.points) + "개"));
         }
+        // 80% 이상 맞히면 쪼꼬를 잠깐 만난다
+        boolean canMeet = Mission.canMeet(asked, right);
+        card.addView(Ui.text(this, canMeet
+                ? Mission.MEET_PERCENT + "% 이상 맞혀서 쪼꼬를 잠깐 만났어요!  (지금까지 " + d.meets + "번)"
+                : "한 판에서 " + Mission.MEET_PERCENT + "% 이상 맞히면 쪼꼬를 잠깐 만날 수 있어요. (이번엔 " + pct + "%)", 14, true, canMeet ? Ui.GOOD : Ui.ACCENT), Ui.below(this, 10));
+        if (canMeet) Ui.button(page, "쪼꼬 한 번 더 보기", Ui.BTN_GOOD, () -> startActivity(new android.content.Intent(this, IntroActivity.class).putExtra("meet", true).putExtra("again", true)));
         Ui.button(page, "한 판 더!", Ui.BTN_PRIMARY, this::recreate);
         Ui.button(page, "사무소로 돌아가기", Ui.BTN_PLAIN, this::finish);
+        if (canMeet && !meetShown) {
+            meetShown = true;
+            startActivity(new android.content.Intent(this, IntroActivity.class).putExtra("meet", true));
+        }
     }
 
     // ---------- 진행 ----------

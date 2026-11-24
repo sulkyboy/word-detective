@@ -144,6 +144,7 @@ public class T {
         Mission.advance(d); eq("m5", Mission.MATCH, Mission.type(d.stage)); d.matches++; eq("m5 done", true, Mission.done(d));
         Mission.advance(d); eq("m6", Mission.MASTER, Mission.type(d.stage)); pool.get(1).box = 3; pool.get(2).box = 4; eq("m6 have", 2, Mission.have(d));
         pool.get(3).box = 3; Mission.advance(d); eq("m7", "단서 150개 모으기", Mission.task(d.stage)); eq("m8", "도전장 2판 끝내기", Mission.task(d.stage + 1)); eq("m12", 200, Mission.need(d.stage + 5));
+        eq("meet 8/10", true, Mission.canMeet(10, 8)); eq("meet 7/10", false, Mission.canMeet(10, 7)); eq("meet 4/5", true, Mission.canMeet(5, 4)); eq("meet 2/2", false, Mission.canMeet(2, 2));
         for (int st = 0; st < 12; st++) if (Mission.demand(st).isEmpty() || Mission.excuse(st).isEmpty()) eq("texts " + st, "non-empty", "empty");
         d.record(200, 10, 8); d.record(201, 5, 5); d.record(203, 5, 1);
         Data e = Data.fromJson(d.toJson());

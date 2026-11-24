@@ -49,7 +49,7 @@ public class DecksActivity extends SubActivity {
         LinearLayout page = Ui.page(this);
 
         if (reading) {
-            Ui.say(page, R.drawable.ch_jjoko, "쪼코", "킁킁… 사진에서 단어를 찾고 있어요. 잠깐만요!", Ui.ACCENT);
+            Ui.say(page, R.drawable.ch_jjoko, "쪼꼬", "킁킁… 사진에서 단어를 찾고 있어요. 잠깐만요!", Ui.ACCENT);
             return;
         }
 
@@ -61,7 +61,7 @@ public class DecksActivity extends SubActivity {
         Ui.button(make, "직접 입력하거나 붙여넣기", Ui.BTN_PLAIN, this::typeIn);
 
         if (d.decks.isEmpty()) {
-            Ui.say(page, R.drawable.ch_jjoko, "쪼코", "아직 사건 파일이 없어요. 단어장을 찍어서 첫 사건을 시작해요!", Ui.ACCENT);
+            Ui.say(page, R.drawable.ch_jjoko, "쪼꼬", "아직 사건 파일이 없어요. 단어장을 찍어서 첫 사건을 시작해요!", Ui.ACCENT);
             return;
         }
         LinearLayout list = Ui.card(page);

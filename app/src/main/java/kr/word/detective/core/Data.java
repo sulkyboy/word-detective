@@ -20,6 +20,7 @@ public final class Data {
     public int stage;                   // 지금까지 들어준 요구 수 (= 속은 횟수)
     public int mSolved, mPoints, mMatches, mMaster;
     public int matches;                 // 짝 맞추기를 끝낸 횟수
+    public int meets;                   // 쪼꼬를 잠깐 만난 횟수 (도전장에서 80% 이상 맞혔을 때)
     public long nextId = 1;
     public final List<Deck> decks = new ArrayList<Deck>();
     /** 날짜 번호 → {푼 문제 수, 맞힌 수} */
@@ -72,6 +73,7 @@ public final class Data {
                 .append(",\"mMatches\":").append(mMatches)
                 .append(",\"mMaster\":").append(mMaster)
                 .append(",\"matches\":").append(matches)
+                .append(",\"meets\":").append(meets)
                 .append(",\"nextId\":").append(nextId)
                 .append(",\"history\":[");
         boolean first = true;
@@ -119,6 +121,7 @@ public final class Data {
         x.mMatches = num(m, "mMatches", 0);
         x.mMaster = num(m, "mMaster", 0);
         x.matches = num(m, "matches", 0);
+        x.meets = num(m, "meets", 0);
         x.nextId = Math.max(1, num(m, "nextId", 1));
         for (Map<String, Object> h : Json.list(m.get("history")))
             x.history.put((long) num(h, "d", 0), new int[] {num(h, "a", 0), num(h, "r", 0)});

@@ -87,9 +87,9 @@ public class HomeActivity extends Activity {
                 : "최고 등급에 올랐어요!"));
         card.addView(Ui.note(this, "연속 출석 " + d.liveStreak(today) + "일  ·  해결한 사건 " + d.solved + "건"));
 
-        // 괴도의 요구: 이것만 하면 쪼코를 풀어 준다는데…
+        // 괴도의 요구: 이것만 하면 쪼꼬를 풀어 준다는데…
         LinearLayout op = Ui.card(page);
-        op.addView(Ui.heading(this, "쪼코를 구하려면  ·  괴도의 " + (d.stage + 1) + "번째 요구"));
+        op.addView(Ui.heading(this, "쪼꼬를 구하려면  ·  괴도의 " + (d.stage + 1) + "번째 요구"));
         LinearLayout or = Ui.line(this);
         or.addView(Ui.image(this, R.drawable.ch_thief, 60));
         or.addView(Ui.image(this, R.drawable.ch_jjoko, 48));
@@ -103,6 +103,7 @@ public class HomeActivity extends Activity {
         int have = Mission.have(d), need = Mission.need(d.stage);
         Ui.bar(op, 100 * have / need, Ui.DANGER);
         op.addView(Ui.note(this, (need > 1 ? have + " / " + need + "  ·  " : "") + "\"이것만 하면 풀어 준다\"는 말에 속은 횟수 " + d.stage + "번"));
+        op.addView(Ui.note(this, "도전장 한 판에서 " + Mission.MEET_PERCENT + "% 이상 맞히면 쪼꼬를 잠깐 만날 수 있어요.  (만난 횟수 " + d.meets + "번)"));
 
         // 오늘의 상황
         int total = 0, due = 0, unsolved = 0;

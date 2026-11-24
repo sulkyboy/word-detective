@@ -27,14 +27,15 @@ import kr.word.detective.core.Mission;
 
 /**
  * 만화 장면. 두 가지로 쓰인다.
- *  - 인트로(기본): 괴도아빠와 괴도엄마가 쪼코를 데려가고 "시키는 대로 하면 풀어 준다"는 쪽지를 남긴다.
+ *  - 인트로(기본): 괴도아빠와 괴도엄마가 쪼꼬를 데려가고 "시키는 대로 하면 풀어 준다"는 쪽지를 남긴다.
+ *  - 면회(meet=true): 도전장에서 80% 이상 맞혔을 때. 쪼꼬를 잠깐 만나고, 다시 헤어진다.
  *  - 속임(trick=true): 요구를 들어줬을 때. 풀어 달라고 하면 핑계를 대고 다음 요구를 내놓는다 (core/Mission).
  * 장면은 저절로 넘어가고, 화면을 누르면 바로 다음 장면으로 간다. [넘기기]는 언제든 끝낸다.
  */
 public class IntroActivity extends Activity {
     private static final int NIGHT = 0xFF16203A, GROUND = 0xFF24345C;
 
-    private boolean trick;
+    private boolean trick, meet;
     private String excuse = "", doneTask = "";    // 속임 장면: 방금 들어준 요구와 괴도의 핑계
     private Data d;
     private FrameLayout stage;
@@ -51,7 +52,12 @@ public class IntroActivity extends Activity {
         super.onCreate(b);
         d = Store.get(this);
         trick = getIntent().getBooleanExtra("trick", false);
-        last = trick ? 2 : 4;
+        meet = getIntent().getBooleanExtra("meet", false);
+        last = trick || meet ? 2 : 4;
+        if (meet && b == null && !getIntent().getBooleanExtra("again", false)) {
+            d.meets++;
+            Store.save(this);
+        }
         if (trick) {
             if (b != null) {
                 excuse = b.getString("excuse", "");
@@ -280,8 +286,8 @@ public class IntroActivity extends Activity {
         }
         String name = (d.hero.isEmpty() ? "꼬마" : d.hero) + " 탐정";
         long hold;
-        if (trick) hold = trickScene(n, name); else hold = kidnapScene(n, name);
-        next.setText(n >= last ? (trick ? "좋아, 이번엔 꼭!" : "쪼코 찾으러 가기!") : "다음  ▶");
+        if (meet) hold = meetScene(n, name); else if (trick) hold = trickScene(n, name); else hold = kidnapScene(n, name);
+        next.setText(n >= last ? (meet ? "또 만나자, 쪼꼬!" : trick ? "좋아, 이번엔 꼭!" : "쪼꼬 찾으러 가기!") : "다음  ▶");
         Ui.style(next, n >= last ? Ui.BTN_GOOD : Ui.BTN_PRIMARY);
         if (n < last) handler.postDelayed(auto, hold);
     }
@@ -301,10 +307,10 @@ public class IntroActivity extends Activity {
     }
 
     private long kidnapScene(int n, String name) {
-        title.setText("쪼코 납치 사건");
+        title.setText("쪼꼬 납치 사건");
         switch (n) {
             case 0:
-                caption.setText("어느 조용한 밤, 탐정 사무소…\n" + name + "과 강아지 쪼코가 쉬고 있었다.");
+                caption.setText("어느 조용한 밤, 탐정 사무소…\n" + name + "과 강아지 쪼꼬가 쉬고 있었다.");
                 put(hero, 0.30f);
                 put(dog, 0.60f);
                 bob(dog, 6, 700, 0);
@@ -322,7 +328,7 @@ public class IntroActivity extends Activity {
                 above(bang, dog, 0.60f, "?", 2000);
                 return 4600;
             case 2:
-                caption.setText("\"쪼코는 우리가 데려간다, 후후후!\"");
+                caption.setText("\"쪼꼬는 우리가 데려간다, 후후후!\"");
                 put(hero, 0.30f);
                 put(dog, 0.60f);
                 put(thief, 0.88f);
@@ -347,20 +353,62 @@ public class IntroActivity extends Activity {
                 dropCard(Mission.demand(d.stage) + "\n— 괴도아빠", 0.66f, 700);
                 return 6500;
             default:
-                caption.setText(name + ", 출동!\n시키는 대로 하면 쪼코를 풀어 준다는데…");
+                caption.setText(name + ", 출동!\n시키는 대로 하면 쪼꼬를 풀어 준다는데…");
                 put(hero, 0.5f);
                 bob(hero, 10, 380, 0);
-                above(bubble, hero, 0.5f, "쪼코야, 기다려!", 300);
+                above(bubble, hero, 0.5f, "쪼꼬야, 기다려!", 300);
                 return 0;
         }
     }
 
-    /** 요구를 들어주고 쪼코를 풀어 달라고 하지만, 괴도 가족은 핑계를 대고 다음 요구를 내놓는다 */
+    /** 면회: 80% 이상 맞혀서 쪼꼬를 잠깐 만난다. 그리고 괴도아빠가 다시 데려간다. */
+    private long meetScene(int n, String name) {
+        title.setText("쪼꼬 면회  ·  " + d.meets + "번째");
+        switch (n) {
+            case 0:
+                caption.setText("괴도엄마: \"호호, " + Mission.MEET_PERCENT + "%나 넘게 맞혔네요.\n약속대로 쪼꼬를 잠깐만 만나게 해 줄게요~\"");
+                put(thief, 0.62f);
+                put(dog, 0.76f);
+                put(mom, 0.92f);
+                put(hero, -0.25f);
+                walk(hero, 0.18f, 200, 1300);
+                bob(mom, 5, 300, 0);
+                bob(dog, 10, 200, 1200);
+                return 5200;
+            case 1:
+                caption.setText("쪼꼬를 만났다!\n쪼꼬가 꼬리를 흔들며 달려온다.");
+                put(hero, 0.26f);
+                put(thief, 0.78f);
+                put(mom, 0.94f);
+                put(dog, 0.66f);
+                walk(dog, 0.46f, 200, 900);
+                bob(dog, 14, 190, 200);
+                bob(hero, 8, 320, 900);
+                above(bubble, dog, 0.50f, "멍멍! 멍!", 1100);
+                above(bang, hero, 0.26f, "♥", 1300);
+                return 6000;
+            default:
+                caption.setText("괴도아빠: \"면회 끝! 풀어 주는 건 내 요구를 들어준 다음이다.\"\n다음에도 " + Mission.MEET_PERCENT + "% 이상 맞히면 또 만날 수 있어요.");
+                put(hero, 0.22f);
+                put(dog, 0.46f);
+                put(thief, 0.80f);
+                above(bubble, dog, 0.46f, "멍…", 300);
+                walk(thief, 0.60f, 300, 700);
+                later(1900, () -> {
+                    bubble.animate().alpha(0f).setStartDelay(0).setDuration(200).start();
+                    dash(dog, 1.4f, 0);
+                    dash(thief, 1.5f, 60);
+                });
+                return 0;
+        }
+    }
+
+    /** 요구를 들어주고 쪼꼬를 풀어 달라고 하지만, 괴도 가족은 핑계를 대고 다음 요구를 내놓는다 */
     private long trickScene(int n, String name) {
         title.setText("괴도의 약속  ·  " + d.stage + "번째");
         switch (n) {
             case 0:
-                caption.setText(name + ": \"시키는 대로 했어요!\n(" + doneTask + ")\n이제 쪼코를 풀어 주세요!\"");
+                caption.setText(name + ": \"시키는 대로 했어요!\n(" + doneTask + ")\n이제 쪼꼬를 풀어 주세요!\"");
                 put(thief, 0.64f);
                 put(dog, 0.78f);
                 put(mom, 0.92f);

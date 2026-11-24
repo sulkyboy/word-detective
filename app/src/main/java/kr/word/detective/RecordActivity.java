@@ -40,6 +40,8 @@ public class RecordActivity extends SubActivity {
         row(sum, "탐정 등급", Rank.name(d.points) + "  (단서 " + d.points + "개)");
         row(sum, "연속 출석", d.liveStreak(today) + "일");
         row(sum, "끝낸 공부(사건)", d.solved + "번");
+        row(sum, "괴도의 요구를 들어준 횟수", d.stage + "번");
+        row(sum, "쪼꼬를 만난 횟수 (80% 이상)", d.meets + "번");
         row(sum, "전체 단어", all.size() + "개");
         row(sum, "한 번 이상 공부한 단어", seen + "개");
         row(sum, "다 외운 단어 (★ 3개 이상)", mastered + "개");

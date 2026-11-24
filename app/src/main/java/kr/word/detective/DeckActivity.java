@@ -29,7 +29,7 @@ public class DeckActivity extends SubActivity {
         int ready = 0;
         for (Word w : deck.words) if (!w.ko.isEmpty()) ready++;
         if (getIntent().getBooleanExtra("fresh", false)) {
-            Ui.say(page, R.drawable.ch_jjoko, "쪼코가 몰래 보낸 쪽지", ready > 0
+            Ui.say(page, R.drawable.ch_jjoko, "쪼꼬가 몰래 보낸 쪽지", ready > 0
                     ? "멍! 단어장이 준비됐어요. 아래 [이 단어장으로 도전장 받기]를 누르면 문제가 시작돼요!"
                     : "뜻이 들어 있는 단어가 없어요. [단어 고치기·더하기]에서 뜻을 넣어 주세요.", Ui.ACCENT);
         }
