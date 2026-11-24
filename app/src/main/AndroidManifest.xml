@@ -29,6 +29,10 @@
             </intent-filter>
         </activity>
 
+        <!-- 인트로 만화 (쪼코 납치), 구출 장면 -->
+        <activity android:name=".IntroActivity" android:exported="false"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
+
         <activity android:name=".DecksActivity" android:exported="false" android:label="사건 파일 (단어장)" />
         <activity android:name=".DeckActivity" android:exported="false" android:label="단어장" />
         <activity android:name=".EditActivity" android:exported="false" android:label="단어 확인·고치기"

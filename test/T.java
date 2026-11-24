@@ -64,6 +64,8 @@ public class T {
 
         // 저장하고 다시 읽기
         Data d = new Data(); d.hero = "민\"지"; d.points = 120; Deck dk = new Deck(); dk.id = d.nextId++; dk.name = "Day 1"; dk.words.addAll(pool); d.decks.add(dk);
+        d.captive = true; d.rescued = 2; d.chapterStart = 100; d.freeDay = 199; d.intro = false;
+        eq("need", 200, d.need()); eq("gathered", 20, d.gathered());
         d.record(200, 10, 8); d.record(201, 5, 5); d.record(203, 5, 1);
         Data e = Data.fromJson(d.toJson());
         eq("roundtrip", d.toJson(), e.toJson());

@@ -49,6 +49,11 @@ public class SettingsActivity extends SubActivity {
         Ui.choice(opt, "단어를 소리로 읽어 주기", d.sound, () -> { d.sound = !d.sound; Store.save(this); render(); });
         Ui.choice(opt, "시간 제한 두기 (번개 사건: 한 문제 20초, 스펠링 30초)", d.timer, () -> { d.timer = !d.timer; Store.save(this); render(); });
 
+        LinearLayout story = Ui.card(page);
+        story.addView(Ui.heading(this, "인트로 만화"));
+        Ui.choice(story, "앱을 열 때 인트로 만화 보기 (쪼코가 잡혀 있는 동안)", d.intro, () -> { d.intro = !d.intro; Store.save(this); render(); });
+        Ui.button(story, "인트로 만화 다시 보기", Ui.BTN_PLAIN, () -> startActivity(new android.content.Intent(this, IntroActivity.class)));
+
         LinearLayout up = Ui.card(page);
         up.addView(Ui.heading(this, "앱 버전"));
         up.addView(Ui.note(this, "지금 버전 " + Updater.currentName(this)

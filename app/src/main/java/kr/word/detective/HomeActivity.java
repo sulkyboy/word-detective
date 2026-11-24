@@ -17,10 +17,26 @@ import kr.word.detective.core.Word;
 /** 첫 화면: 탐정 사무소. 탐정의 등급·단서와, 오늘 할 일을 보여 준다. */
 public class HomeActivity extends Activity {
     private boolean asked;
+    private boolean introUp;     // 인트로 만화를 막 띄웠다 (그 뒤에 가려진 동안에는 이름을 묻지 않는다)
 
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
+        if (b == null) {
+            Data d = Store.get(this);
+            long today = Store.today();
+            // 구출한 다음 날(또는 처음 켠 날) 괴도 가족이 쪼코를 데려간다
+            boolean newChapter = !d.captive && today > d.freeDay;
+            if (newChapter) {
+                d.captive = true;
+                d.chapterStart = d.points;
+                Store.save(this);
+            }
+            if (newChapter || (d.captive && d.intro)) {
+                introUp = true;
+                startActivity(new Intent(this, IntroActivity.class));
+            }
+        }
         // 새 버전이 있는지 조용히 확인 (결과는 다음에 화면을 그릴 때 보인다)
         new Thread(() -> {
             if (Updater.check(getApplicationContext()) != null) runOnUiThread(this::render);
@@ -32,6 +48,13 @@ public class HomeActivity extends Activity {
         super.onResume();
         render();
         Data d = Store.get(this);
+        if (introUp) { introUp = false; return; }
+        // 단서를 다 모았으면 구출 장면
+        if (d.captive && d.gathered() >= d.need()) {
+            introUp = true;
+            startActivity(new Intent(this, IntroActivity.class).putExtra("rescue", true));
+            return;
+        }
         if (d.hero.isEmpty() && !asked) { asked = true; askName(); }
     }
 
@@ -46,7 +69,7 @@ public class HomeActivity extends Activity {
         LinearLayout card = Ui.card(page);
         LinearLayout row = Ui.line(this);
         row.addView(Ui.image(this, R.drawable.ch_detective, 104));
-        row.addView(Ui.image(this, R.drawable.ch_jjoko, 76));
+        if (!d.captive) row.addView(Ui.image(this, R.drawable.ch_jjoko, 76));
         LinearLayout info = Ui.column(this);
         info.addView(Ui.text(this, hero + " 탐정", 20, true, Ui.INK));
         info.addView(Ui.text(this, Rank.name(d.points), 14, true, Ui.ACCENT));
@@ -61,6 +84,27 @@ public class HomeActivity extends Activity {
                 ? "단서 " + toNext + "개를 더 모으면 '" + Rank.nextName(d.points) + "'"
                 : "최고 등급에 올랐어요!"));
         card.addView(Ui.note(this, "연속 출석 " + d.liveStreak(today) + "일  ·  해결한 사건 " + d.solved + "건"));
+
+        // 쪼코 구출 작전
+        if (d.captive) {
+            LinearLayout op = Ui.card(page);
+            op.addView(Ui.heading(this, "쪼코 구출 작전  ·  제" + (d.rescued + 1) + "장"));
+            LinearLayout or = Ui.line(this);
+            or.addView(Ui.image(this, R.drawable.ch_thief, 60));
+            or.addView(Ui.image(this, R.drawable.ch_jjoko, 48));
+            or.addView(Ui.image(this, R.drawable.ch_helper, 60));
+            int left = Math.max(0, d.need() - d.gathered());
+            TextView ot = Ui.text(this, "쪼코가 괴도 가족에게 잡혀 있어요!\n단서 " + left + "개를 더 모으면 찾을 수 있어요.", 14, true, Ui.INK);
+            ot.setLineSpacing(Ui.dp(this, 3), 1f);
+            LinearLayout.LayoutParams op2 = Ui.fill();
+            op2.leftMargin = Ui.dp(this, 10);
+            or.addView(ot, op2);
+            op.addView(or);
+            Ui.bar(op, 100 * d.gathered() / d.need(), Ui.DANGER);
+            op.addView(Ui.note(this, "모은 단서 " + Math.min(d.gathered(), d.need()) + " / " + d.need() + "개  ·  지금까지 구출 " + d.rescued + "번"));
+        } else {
+            Ui.say(page, R.drawable.ch_jjoko, "쪼코", "멍멍! 구해 줘서 고마워요. 오늘은 같이 있어요! (구출 " + d.rescued + "번째)", Ui.ACCENT);
+        }
 
         // 오늘의 상황
         int total = 0, due = 0, fresh = 0, unsolved = 0;

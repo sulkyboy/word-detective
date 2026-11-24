@@ -15,6 +15,12 @@ public final class Data {
     public int perSession = 10;         // 한 번에 푸는 단어 수
     public boolean timer;               // 시간 제한(번개 사건)
     public boolean sound = true;        // 소리로 읽어 주기
+    public boolean intro = true;        // 앱을 열 때 인트로 만화 보기
+    // 쪼코 구출 이야기: 괴도 가족이 쪼코를 데려가면(captive) 단서를 모아 구출한다. 구출한 날은 함께 있고, 다음 날 또 데려간다.
+    public boolean captive;             // 쪼코가 잡혀 있는지
+    public int rescued;                 // 지금까지 구출한 횟수
+    public int chapterStart;            // 이번에 잡혀 갔을 때의 단서 수
+    public long freeDay;                // 마지막으로 구출한 날
     public long nextId = 1;
     public final List<Deck> decks = new ArrayList<Deck>();
     /** 날짜 번호 → {푼 문제 수, 맞힌 수} */
@@ -48,6 +54,12 @@ public final class Data {
         return lastDay >= today - 1 ? streak : 0;
     }
 
+    /** 이번 장에서 쪼코를 구출하려면 모아야 하는 단서 수 (구출할수록 조금씩 늘어난다) */
+    public int need() { return Math.min(300, 100 + 50 * rescued); }
+
+    /** 이번 장에서 지금까지 모은 단서 */
+    public int gathered() { return Math.max(0, points - chapterStart); }
+
     // ---------- 저장 ----------
 
     public String toJson() {
@@ -60,6 +72,11 @@ public final class Data {
                 .append(",\"perSession\":").append(perSession)
                 .append(",\"timer\":").append(timer ? 1 : 0)
                 .append(",\"sound\":").append(sound ? 1 : 0)
+                .append(",\"intro\":").append(intro ? 1 : 0)
+                .append(",\"captive\":").append(captive ? 1 : 0)
+                .append(",\"rescued\":").append(rescued)
+                .append(",\"chapterStart\":").append(chapterStart)
+                .append(",\"freeDay\":").append(freeDay)
                 .append(",\"nextId\":").append(nextId)
                 .append(",\"history\":[");
         boolean first = true;
@@ -100,6 +117,11 @@ public final class Data {
         x.perSession = Math.max(5, Math.min(30, num(m, "perSession", 10)));
         x.timer = num(m, "timer", 0) == 1;
         x.sound = num(m, "sound", 1) == 1;
+        x.intro = num(m, "intro", 1) == 1;
+        x.captive = num(m, "captive", 0) == 1;
+        x.rescued = num(m, "rescued", 0);
+        x.chapterStart = num(m, "chapterStart", 0);
+        x.freeDay = num(m, "freeDay", 0);
         x.nextId = Math.max(1, num(m, "nextId", 1));
         for (Map<String, Object> h : Json.list(m.get("history")))
             x.history.put((long) num(h, "d", 0), new int[] {num(h, "a", 0), num(h, "r", 0)});
