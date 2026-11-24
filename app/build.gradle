@@ -1,0 +1,47 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'kr.word.detective'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'kr.word.detective'
+        minSdk 29
+        targetSdk 34
+        versionCode Integer.parseInt(System.getenv('GITHUB_RUN_NUMBER') ?: '1')
+        versionName "1.0." + (System.getenv('GITHUB_RUN_NUMBER') ?: '0')
+        // 설치 파일 크기를 줄이려고 실제 휴대폰용(arm64)만 넣는다. 화면 확인용 빌드(-PuiTest)는 에뮬레이터용(x86_64)도 넣는다.
+        ndk {
+            abiFilters = project.hasProperty('uiTest') ? ['arm64-v8a', 'x86_64'] : ['arm64-v8a']
+        }
+    }
+
+    signingConfigs {
+        // 저장소에 고정 서명키를 두어, 새 버전을 기존 앱 위에 덮어 설치할 수 있게 한다
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+        encoding 'UTF-8'
+    }
+}
+
+dependencies {
+    // 사진 속 글자 읽기(휴대폰 안에서 동작, 인터넷·요금 없음). 한국어용이 영어도 함께 읽는다.
+    implementation 'com.google.mlkit:text-recognition-korean:16.0.1'
+}
