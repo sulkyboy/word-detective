@@ -64,12 +64,24 @@ public class T {
 
         // 저장하고 다시 읽기
         Data d = new Data(); d.hero = "민\"지"; d.points = 120; Deck dk = new Deck(); dk.id = d.nextId++; dk.name = "Day 1"; dk.words.addAll(pool); d.decks.add(dk);
-        d.captive = true; d.rescued = 2; d.chapterStart = 100; d.freeDay = 199; d.intro = false;
-        eq("need", 200, d.need()); eq("gathered", 20, d.gathered());
+        d.intro = false;
+        // 괴도의 요구: 사진 → 한 판 → 단서 100 → (두 판, 미해결 0, 짝 맞추기, 외운 단어 3, 단서 150) 되풀이
+        eq("m0", "단어장 사진 찍어 오기/true", Mission.task(d.stage) + "/" + Mission.done(d));
+        Mission.advance(d); eq("bonus", 140, d.points); eq("m1", false, Mission.done(d));
+        d.solved++; eq("m1 done", true, Mission.done(d));
+        Mission.advance(d); eq("m2", "단서 100개 모으기/0", Mission.task(d.stage) + "/" + Mission.have(d));
+        d.points += 60; eq("m2 have", 60, Mission.have(d)); d.points += 60; eq("m2 done", true, Mission.done(d));
+        Mission.advance(d); eq("m3", "도전장 2판 끝내기", Mission.task(d.stage));
+        d.solved += 2; Mission.advance(d); eq("m4", Mission.UNSOLVED, Mission.type(d.stage)); eq("m4 not yet", false, Mission.done(d));
+        d.solved++; eq("m4 done", true, Mission.done(d));
+        Mission.advance(d); eq("m5", Mission.MATCH, Mission.type(d.stage)); d.matches++; eq("m5 done", true, Mission.done(d));
+        Mission.advance(d); eq("m6", Mission.MASTER, Mission.type(d.stage)); pool.get(1).box = 3; pool.get(2).box = 4; eq("m6 have", 2, Mission.have(d));
+        pool.get(3).box = 3; Mission.advance(d); eq("m7", "단서 150개 모으기", Mission.task(d.stage)); eq("m8", "도전장 2판 끝내기", Mission.task(d.stage + 1)); eq("m12", 200, Mission.need(d.stage + 5));
+        for (int st = 0; st < 12; st++) if (Mission.demand(st).isEmpty() || Mission.excuse(st).isEmpty()) eq("texts " + st, "non-empty", "empty");
         d.record(200, 10, 8); d.record(201, 5, 5); d.record(203, 5, 1);
         Data e = Data.fromJson(d.toJson());
         eq("roundtrip", d.toJson(), e.toJson());
-        eq("streak", 1, e.streak); eq("live streak", 0, e.liveStreak(205)); eq("rank", "새내기 탐정", Rank.name(e.points)); eq("to next", 180, Rank.toNext(e.points));
+        eq("streak", 1, e.streak); eq("live streak", 0, e.liveStreak(205)); eq("stage kept", 7, e.stage);
         System.out.println(fails == 0 ? "ALL OK" : fails + " FAILED");
     }
     static Quiz.Q fakeSpell(List<Word> pool) {

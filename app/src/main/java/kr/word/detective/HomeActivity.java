@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import kr.word.detective.core.Data;
+import kr.word.detective.core.Mission;
 import kr.word.detective.core.Rank;
 import kr.word.detective.core.Srs;
 import kr.word.detective.core.Word;
@@ -23,16 +24,7 @@ public class HomeActivity extends Activity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         if (b == null) {
-            Data d = Store.get(this);
-            long today = Store.today();
-            // 구출한 다음 날(또는 처음 켠 날) 괴도 가족이 쪼코를 데려간다
-            boolean newChapter = !d.captive && today > d.freeDay;
-            if (newChapter) {
-                d.captive = true;
-                d.chapterStart = d.points;
-                Store.save(this);
-            }
-            if (newChapter || (d.captive && d.intro)) {
+            if (Store.get(this).intro) {
                 introUp = true;
                 startActivity(new Intent(this, IntroActivity.class));
             }
@@ -49,10 +41,10 @@ public class HomeActivity extends Activity {
         render();
         Data d = Store.get(this);
         if (introUp) { introUp = false; return; }
-        // 단서를 다 모았으면 구출 장면
-        if (d.captive && d.gathered() >= d.need()) {
+        // 요구를 들어줬으면: 풀어 달라고 하는 장면 (그리고 또 속는다)
+        if (Mission.done(d)) {
             introUp = true;
-            startActivity(new Intent(this, IntroActivity.class).putExtra("rescue", true));
+            startActivity(new Intent(this, IntroActivity.class).putExtra("trick", true));
             return;
         }
         if (d.hero.isEmpty() && !asked) { asked = true; askName(); }
@@ -69,7 +61,6 @@ public class HomeActivity extends Activity {
         LinearLayout card = Ui.card(page);
         LinearLayout row = Ui.line(this);
         row.addView(Ui.image(this, R.drawable.ch_detective, 104));
-        if (!d.captive) row.addView(Ui.image(this, R.drawable.ch_jjoko, 76));
         LinearLayout info = Ui.column(this);
         info.addView(Ui.text(this, hero + " 탐정", 20, true, Ui.INK));
         info.addView(Ui.text(this, Rank.name(d.points), 14, true, Ui.ACCENT));
@@ -85,41 +76,33 @@ public class HomeActivity extends Activity {
                 : "최고 등급에 올랐어요!"));
         card.addView(Ui.note(this, "연속 출석 " + d.liveStreak(today) + "일  ·  해결한 사건 " + d.solved + "건"));
 
-        // 쪼코 구출 작전
-        if (d.captive) {
-            LinearLayout op = Ui.card(page);
-            op.addView(Ui.heading(this, "쪼코 구출 작전  ·  제" + (d.rescued + 1) + "장"));
-            LinearLayout or = Ui.line(this);
-            or.addView(Ui.image(this, R.drawable.ch_thief, 60));
-            or.addView(Ui.image(this, R.drawable.ch_jjoko, 48));
-            or.addView(Ui.image(this, R.drawable.ch_helper, 60));
-            int left = Math.max(0, d.need() - d.gathered());
-            TextView ot = Ui.text(this, "쪼코가 괴도 가족에게 잡혀 있어요!\n단서 " + left + "개를 더 모으면 찾을 수 있어요.", 14, true, Ui.INK);
-            ot.setLineSpacing(Ui.dp(this, 3), 1f);
-            LinearLayout.LayoutParams op2 = Ui.fill();
-            op2.leftMargin = Ui.dp(this, 10);
-            or.addView(ot, op2);
-            op.addView(or);
-            Ui.bar(op, 100 * d.gathered() / d.need(), Ui.DANGER);
-            op.addView(Ui.note(this, "모은 단서 " + Math.min(d.gathered(), d.need()) + " / " + d.need() + "개  ·  지금까지 구출 " + d.rescued + "번"));
-        } else {
-            Ui.say(page, R.drawable.ch_jjoko, "쪼코", "멍멍! 구해 줘서 고마워요. 오늘은 같이 있어요! (구출 " + d.rescued + "번째)", Ui.ACCENT);
-        }
+        // 괴도의 요구: 이것만 하면 쪼코를 풀어 준다는데…
+        LinearLayout op = Ui.card(page);
+        op.addView(Ui.heading(this, "쪼코를 구하려면  ·  괴도의 " + (d.stage + 1) + "번째 요구"));
+        LinearLayout or = Ui.line(this);
+        or.addView(Ui.image(this, R.drawable.ch_thief, 60));
+        or.addView(Ui.image(this, R.drawable.ch_jjoko, 48));
+        or.addView(Ui.image(this, R.drawable.ch_helper, 60));
+        TextView ot = Ui.text(this, Mission.task(d.stage), 16, true, Ui.DANGER);
+        ot.setLineSpacing(Ui.dp(this, 3), 1f);
+        LinearLayout.LayoutParams op2 = Ui.fill();
+        op2.leftMargin = Ui.dp(this, 10);
+        or.addView(ot, op2);
+        op.addView(or);
+        int have = Mission.have(d), need = Mission.need(d.stage);
+        Ui.bar(op, 100 * have / need, Ui.DANGER);
+        op.addView(Ui.note(this, (need > 1 ? have + " / " + need + "  ·  " : "") + "\"이것만 하면 풀어 준다\"는 말에 속은 횟수 " + d.stage + "번"));
 
         // 오늘의 상황
-        int total = 0, due = 0, fresh = 0, unsolved = 0;
+        int total = 0, due = 0, unsolved = 0;
         for (Word w : d.allWords()) {
             if (w.ko.isEmpty()) continue;
             total++;
             if (Srs.due(w, today)) due++;
-            if (!w.seen) fresh++;
             if (Srs.unsolved(w)) unsolved++;
         }
-        String line;
-        if (total == 0) line = "후후후, 단어장도 없이 나를 잡겠다고? 먼저 '사건 파일'에서 단어장 사진을 찍어 오너라!";
-        else if (due > 0) line = "오늘 다시 풀어야 할 단서가 " + due + "개나 남았다. 풀 수 있겠나, " + hero + " 탐정?";
-        else if (fresh > 0) line = "아직 손도 못 댄 단어가 " + fresh + "개다. 내 도전장을 받아라!";
-        else line = "흥, 오늘 것은 다 풀었군. 그래도 한 판 더 붙어 보겠나?";
+        String line = Mission.demand(d.stage);
+        if (d.stage > 0 && due > 0) line += "  (오늘 다시 풀 단서도 " + due + "개 있다!)";
         Ui.say(page, R.drawable.ch_thief, "괴도아빠", line, Ui.DANGER);
 
         final boolean any = total > 0;

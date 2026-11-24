@@ -129,6 +129,7 @@ public class MatchActivity extends SubActivity {
         int gain = found * 2 + (misses == 0 ? 6 : 0);
         if (startAt != 0) {          // 점수는 한 번만
             d.points += gain;
+            d.matches++;
             d.record(Store.today(), 0, 0);
             Store.save(this);
             startAt = 0;

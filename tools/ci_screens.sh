@@ -155,7 +155,7 @@ for i, (en, ko) in enumerate(src):
     w = {"en": en, "ko": ko, "seen": 1 if i < 7 else 0, "box": [0,1,2,3,4,0,1,0,0,0][i], "due": t - 1 if i < 7 else 0,
          "right": [1,2,3,4,6,0,1,0,0,0][i], "wrong": [3,1,0,1,0,2,0,0,0,0][i]}
     words.append(w)
-d = {"intro": 0, "captive": 1, "rescued": 1, "chapterStart": 200, "freeDay": t - 1, "hero": "지우", "points": 260, "solved": 7, "streak": 3, "lastDay": t - 1, "perSession": 5, "timer": 0, "sound": 1, "nextId": 3,
+d = {"intro": 0, "stage": 2, "mSolved": 7, "mPoints": 200, "hero": "지우", "points": 260, "solved": 7, "streak": 3, "lastDay": t - 1, "perSession": 5, "timer": 0, "sound": 1, "nextId": 3,
      "history": [{"d": t - 3, "a": 10, "r": 6}, {"d": t - 2, "a": 12, "r": 9}, {"d": t - 1, "a": 10, "r": 9}],
      "decks": [{"id": 1, "name": "Day 1 (3단원)", "words": words},
                {"id": 2, "name": "학원 단어 11월 4주", "words": [{"en": "bridge", "ko": "다리"}, {"en": "quiet", "ko": "조용한"}, {"en": "borrow", "ko": ""}]}]}
@@ -238,18 +238,19 @@ start StudyActivity;     shot 42_study_sysfont_13 3
 adb shell settings put system font_scale 1.0
 adb shell am force-stop $PKG
 
-# ---- 5b) 인트로 넘기기, 구출 장면 (단서를 다 모은 상태로 바꿔서 연다)
+# ---- 5b) 인트로 넘기기, 속임 장면 (요구를 다 들어준 상태로 바꿔서 연다)
 sed -e 's/"intro": 0/"intro": 1/' "$OUT/seed.json" > "$OUT/seed_intro.json"
 seed "$OUT/seed_intro.json"
 start HomeActivity;      shot 60_intro_again 2
+adb shell input tap 540 900; sleep 0.5; adb shell input tap 540 900; sleep 0.5; adb shell input tap 540 900;  shot 60b_intro_note 3
 tap "넘기기  ▶▶";        shot 61_after_skip 2
-sed -e 's/"chapterStart": 200/"chapterStart": 100/' "$OUT/seed.json" > "$OUT/seed_rescue.json"
-seed "$OUT/seed_rescue.json"
-start HomeActivity;      shot 62_rescue_scene0 2.5
-tap "다음  ▶";           shot 63_rescue_scene1 2
-tap "다음  ▶";           shot 64_rescue_scene2 2
-tap "야호!  쪼코와 돌아가기";  shot 65_home_with_jjoko 2.5
-rm -f "$OUT/seed_intro.json" "$OUT/seed_rescue.json"
+sed -e 's/"mPoints": 200/"mPoints": 150/' "$OUT/seed.json" > "$OUT/seed_trick.json"
+seed "$OUT/seed_trick.json"
+start HomeActivity;      shot 62_trick_scene0 2.5
+tap "다음  ▶";           shot 63_trick_scene1 2
+tap "다음  ▶";           shot 64_trick_scene2 2.5
+tap "좋아, 이번엔 꼭!";  shot 65_home_next_demand 2.5
+rm -f "$OUT/seed_intro.json" "$OUT/seed_trick.json"
 
 # ---- 6) 글자 인식: 시험용 단어장 그림을 실제 인식에 넣어 본다
 adb shell mkdir -p /sdcard/Android/data/$PKG/files

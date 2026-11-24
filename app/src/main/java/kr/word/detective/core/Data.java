@@ -16,11 +16,10 @@ public final class Data {
     public boolean timer;               // 시간 제한(번개 사건)
     public boolean sound = true;        // 소리로 읽어 주기
     public boolean intro = true;        // 앱을 열 때 인트로 만화 보기
-    // 쪼코 구출 이야기: 괴도 가족이 쪼코를 데려가면(captive) 단서를 모아 구출한다. 구출한 날은 함께 있고, 다음 날 또 데려간다.
-    public boolean captive;             // 쪼코가 잡혀 있는지
-    public int rescued;                 // 지금까지 구출한 횟수
-    public int chapterStart;            // 이번에 잡혀 갔을 때의 단서 수
-    public long freeDay;                // 마지막으로 구출한 날
+    // 괴도의 요구(core/Mission): 몇 번째 요구인지와, 그 요구가 시작됐을 때의 값들
+    public int stage;                   // 지금까지 들어준 요구 수 (= 속은 횟수)
+    public int mSolved, mPoints, mMatches, mMaster;
+    public int matches;                 // 짝 맞추기를 끝낸 횟수
     public long nextId = 1;
     public final List<Deck> decks = new ArrayList<Deck>();
     /** 날짜 번호 → {푼 문제 수, 맞힌 수} */
@@ -54,12 +53,6 @@ public final class Data {
         return lastDay >= today - 1 ? streak : 0;
     }
 
-    /** 이번 장에서 쪼코를 구출하려면 모아야 하는 단서 수 (구출할수록 조금씩 늘어난다) */
-    public int need() { return Math.min(300, 100 + 50 * rescued); }
-
-    /** 이번 장에서 지금까지 모은 단서 */
-    public int gathered() { return Math.max(0, points - chapterStart); }
-
     // ---------- 저장 ----------
 
     public String toJson() {
@@ -73,10 +66,12 @@ public final class Data {
                 .append(",\"timer\":").append(timer ? 1 : 0)
                 .append(",\"sound\":").append(sound ? 1 : 0)
                 .append(",\"intro\":").append(intro ? 1 : 0)
-                .append(",\"captive\":").append(captive ? 1 : 0)
-                .append(",\"rescued\":").append(rescued)
-                .append(",\"chapterStart\":").append(chapterStart)
-                .append(",\"freeDay\":").append(freeDay)
+                .append(",\"stage\":").append(stage)
+                .append(",\"mSolved\":").append(mSolved)
+                .append(",\"mPoints\":").append(mPoints)
+                .append(",\"mMatches\":").append(mMatches)
+                .append(",\"mMaster\":").append(mMaster)
+                .append(",\"matches\":").append(matches)
                 .append(",\"nextId\":").append(nextId)
                 .append(",\"history\":[");
         boolean first = true;
@@ -118,10 +113,12 @@ public final class Data {
         x.timer = num(m, "timer", 0) == 1;
         x.sound = num(m, "sound", 1) == 1;
         x.intro = num(m, "intro", 1) == 1;
-        x.captive = num(m, "captive", 0) == 1;
-        x.rescued = num(m, "rescued", 0);
-        x.chapterStart = num(m, "chapterStart", 0);
-        x.freeDay = num(m, "freeDay", 0);
+        x.stage = Math.max(0, num(m, "stage", 0));
+        x.mSolved = num(m, "mSolved", 0);
+        x.mPoints = num(m, "mPoints", 0);
+        x.mMatches = num(m, "mMatches", 0);
+        x.mMaster = num(m, "mMaster", 0);
+        x.matches = num(m, "matches", 0);
         x.nextId = Math.max(1, num(m, "nextId", 1));
         for (Map<String, Object> h : Json.list(m.get("history")))
             x.history.put((long) num(h, "d", 0), new int[] {num(h, "a", 0), num(h, "r", 0)});

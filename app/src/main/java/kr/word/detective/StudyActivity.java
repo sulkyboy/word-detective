@@ -20,6 +20,7 @@ import java.util.Set;
 import kr.word.detective.core.Data;
 import kr.word.detective.core.Deck;
 import kr.word.detective.core.Judge;
+import kr.word.detective.core.Mission;
 import kr.word.detective.core.Quiz;
 import kr.word.detective.core.Rank;
 import kr.word.detective.core.Srs;
@@ -158,7 +159,7 @@ public class StudyActivity extends SubActivity {
         }
 
         if (listening) {
-            Ui.say(page, R.drawable.ch_jjoko, "쪼코", "귀를 쫑긋! 듣고 있어요. 또박또박 말해 주세요.", Ui.ACCENT);
+            Ui.say(page, R.drawable.ch_jjoko, "쪼코가 몰래 보낸 쪽지", "듣고 있어요. 또박또박 말해 주세요!", Ui.ACCENT);
             Ui.button(page, "그만 듣기", Ui.BTN_PLAIN, () -> { listener.cancel(); listening = false; render(); });
             return;
         }
@@ -189,7 +190,7 @@ public class StudyActivity extends SubActivity {
 
         LinearLayout tools = Ui.line(this);
         tools.setGravity(Gravity.CENTER);
-        tools.addView(Ui.chip(this, hinted ? "힌트: " + Quiz.hint(q) : d.captive ? "쪼코의 비밀 쪽지 (힌트)" : "쪼코에게 힌트 받기", false, () -> { hinted = true; render(); }));
+        tools.addView(Ui.chip(this, hinted ? "힌트: " + Quiz.hint(q) : "쪼코의 비밀 쪽지 (힌트)", false, () -> { hinted = true; render(); }));
         tools.addView(Ui.chip(this, "모르겠어요", false, () -> answer(false, false)), Ui.after(this, 8));
         page.addView(tools, Ui.below(this, 14));
     }
@@ -199,9 +200,7 @@ public class StudyActivity extends SubActivity {
     /** 처음 보는 단어: 쪼코가 물어 온 단서 카드 */
     private void renderIntro(LinearLayout page, final Quiz.Q q) {
         final Word w = q.word;
-        Ui.say(page, R.drawable.ch_jjoko, "쪼코", d.captive
-                ? "(쪼코가 몰래 보낸 쪽지) 멍! 새 단서 카드예요. 괴도아빠가 곧 물어볼 테니 잘 봐 두세요!"
-                : "멍! 새 단서 카드를 물어 왔어요. 괴도아빠가 곧 물어볼 테니 잘 봐 두세요!", Ui.ACCENT);
+        Ui.say(page, R.drawable.ch_jjoko, "쪼코가 몰래 보낸 쪽지", "멍! 새 단서 카드예요. 괴도아빠가 곧 물어볼 테니 잘 봐 두세요!", Ui.ACCENT);
         LinearLayout card = Ui.card(page);
         card.addView(Ui.big(this, w.en, 36, Ui.INK));
         card.addView(Ui.big(this, w.ko, 22, Ui.ACCENT), Ui.below(this, 8));
@@ -247,12 +246,11 @@ public class StudyActivity extends SubActivity {
         LinearLayout card = Ui.card(page);
         LinearLayout row = Ui.line(this);
         row.addView(Ui.image(this, R.drawable.ch_detective, 96));
-        if (!d.captive) row.addView(Ui.image(this, R.drawable.ch_jjoko, 70));
         LinearLayout col = Ui.column(this);
         col.addView(Ui.text(this, "문제 " + asked + "개 중 " + right + "개 정답", 17, true, Ui.INK));
         col.addView(Ui.text(this, "찾은 단서 +" + earned + "개  (모두 " + d.points + "개)", 14, true, 0xFFB57F00));
         col.addView(Ui.text(this, "연속 출석 " + d.liveStreak(today) + "일", 14, false, Ui.SUB));
-        if (d.captive) col.addView(Ui.text(this, d.gathered() >= d.need() ? "쪼코를 찾을 단서가 다 모였다!" : "쪼코 구출까지 단서 " + (d.need() - d.gathered()) + "개", 14, true, Ui.DANGER));
+        col.addView(Ui.text(this, Mission.done(d) ? "괴도의 요구를 해냈다! 쪼코를 풀어 달라고 하자" : "괴도의 요구: " + Mission.task(d.stage), 14, true, Ui.DANGER));
         LinearLayout.LayoutParams lp = Ui.fill();
         lp.leftMargin = Ui.dp(this, 10);
         row.addView(col, lp);

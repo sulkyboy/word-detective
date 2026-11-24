@@ -23,17 +23,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kr.word.detective.core.Data;
+import kr.word.detective.core.Mission;
 
 /**
  * 만화 장면. 두 가지로 쓰인다.
- *  - 인트로(기본): 괴도아빠와 괴도엄마가 쪼코를 데려가고 도전장을 남긴다. 단서를 모아야 쪼코를 찾을 수 있다.
- *  - 구출(rescue=true): 단서를 다 모았을 때. 쪼코를 되찾는다.
+ *  - 인트로(기본): 괴도아빠와 괴도엄마가 쪼코를 데려가고 "시키는 대로 하면 풀어 준다"는 쪽지를 남긴다.
+ *  - 속임(trick=true): 요구를 들어줬을 때. 풀어 달라고 하면 핑계를 대고 다음 요구를 내놓는다 (core/Mission).
  * 장면은 저절로 넘어가고, 화면을 누르면 바로 다음 장면으로 간다. [넘기기]는 언제든 끝낸다.
  */
 public class IntroActivity extends Activity {
     private static final int NIGHT = 0xFF16203A, GROUND = 0xFF24345C;
 
-    private boolean rescue;
+    private boolean trick;
+    private String excuse = "", doneTask = "";    // 속임 장면: 방금 들어준 요구와 괴도의 핑계
     private Data d;
     private FrameLayout stage;
     private TextView caption, next, bubble, bang, card, title;
@@ -48,13 +50,22 @@ public class IntroActivity extends Activity {
     protected void onCreate(Bundle b) {
         super.onCreate(b);
         d = Store.get(this);
-        rescue = getIntent().getBooleanExtra("rescue", false);
-        last = rescue ? 2 : 4;
-        if (rescue && b == null && d.captive) {      // 구출은 장면을 넘겨도 이루어지도록 먼저 적어 둔다
-            d.captive = false;
-            d.rescued++;
-            d.freeDay = Store.today();
-            Store.save(this);
+        trick = getIntent().getBooleanExtra("trick", false);
+        last = trick ? 2 : 4;
+        if (trick) {
+            if (b != null) {
+                excuse = b.getString("excuse", "");
+                doneTask = b.getString("doneTask", "");
+            } else if (Mission.done(d)) {
+                // 장면을 넘겨도 다음 요구로 넘어가도록 먼저 적어 둔다
+                excuse = Mission.excuse(d.stage);
+                doneTask = Mission.task(d.stage);
+                Mission.advance(d);
+                Store.save(this);
+            } else {
+                finish();
+                return;
+            }
         }
 
         LinearLayout root = Ui.column(this);
@@ -95,6 +106,13 @@ public class IntroActivity extends Activity {
             H = stage.getHeight();
             go(0);
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle out) {
+        super.onSaveInstanceState(out);
+        out.putString("excuse", excuse);
+        out.putString("doneTask", doneTask);
     }
 
     @Override
@@ -262,18 +280,31 @@ public class IntroActivity extends Activity {
         }
         String name = (d.hero.isEmpty() ? "꼬마" : d.hero) + " 탐정";
         long hold;
-        if (rescue) hold = rescueScene(n, name); else hold = kidnapScene(n, name);
-        next.setText(n >= last ? (rescue ? "야호!  쪼코와 돌아가기" : "쪼코 찾으러 가기!") : "다음  ▶");
+        if (trick) hold = trickScene(n, name); else hold = kidnapScene(n, name);
+        next.setText(n >= last ? (trick ? "좋아, 이번엔 꼭!" : "쪼코 찾으러 가기!") : "다음  ▶");
         Ui.style(next, n >= last ? Ui.BTN_GOOD : Ui.BTN_PRIMARY);
         if (n < last) handler.postDelayed(auto, hold);
     }
 
+    private void dropCard(String text, float fx, long delay) {
+        card.animate().cancel();
+        card.setText(text);
+        card.setMaxWidth((int) (W * 0.62f));
+        card.measure(View.MeasureSpec.makeMeasureSpec((int) (W * 0.62f), View.MeasureSpec.AT_MOST), View.MeasureSpec.UNSPECIFIED);
+        card.setX(W * fx - card.getMeasuredWidth() / 2f);
+        card.setY(-card.getMeasuredHeight());
+        card.setRotation(-8f);
+        card.setScaleX(1f);
+        card.setScaleY(1f);
+        card.setAlpha(1f);
+        card.animate().y(H * 0.42f - card.getMeasuredHeight() / 2f).rotation(3f).setStartDelay(delay).setDuration(1100).setInterpolator(new BounceInterpolator()).start();
+    }
+
     private long kidnapScene(int n, String name) {
-        int chapter = d.rescued + 1;
-        title.setText("제" + chapter + "장  ·  쪼코 납치 사건");
+        title.setText("쪼코 납치 사건");
         switch (n) {
             case 0:
-                caption.setText(chapter == 1 ? "어느 조용한 밤, 탐정 사무소…\n" + name + "과 강아지 쪼코가 쉬고 있었다." : "쪼코를 되찾고 평화롭던 밤…\n그런데 또 수상한 그림자가!");
+                caption.setText("어느 조용한 밤, 탐정 사무소…\n" + name + "과 강아지 쪼코가 쉬고 있었다.");
                 put(hero, 0.30f);
                 put(dog, 0.60f);
                 bob(dog, 6, 700, 0);
@@ -310,21 +341,13 @@ public class IntroActivity extends Activity {
                 });
                 return 4800;
             case 3:
-                caption.setText("괴도아빠가 도전장을 남기고 사라졌다.");
-                put(hero, 0.24f);
-                above(bang, hero, 0.24f, "!", 300);
-                card.setText("쪼코를 찾고 싶으면\n단어 단서 " + d.need() + "개를\n모아 보거라!\n— 괴도아빠");
-                card.measure(View.MeasureSpec.makeMeasureSpec(W, View.MeasureSpec.AT_MOST), View.MeasureSpec.UNSPECIFIED);
-                card.setX(W * 0.66f - card.getMeasuredWidth() / 2f);
-                card.setY(-card.getMeasuredHeight());
-                card.setRotation(-8f);
-                card.setScaleX(1f);
-                card.setScaleY(1f);
-                card.setAlpha(1f);
-                card.animate().y(H * 0.5f - card.getMeasuredHeight() / 2f).rotation(4f).setStartDelay(700).setDuration(1100).setInterpolator(new BounceInterpolator()).start();
-                return 5600;
+                caption.setText(d.stage == 0 ? "괴도아빠가 쪽지를 남기고 사라졌다." : "괴도아빠의 " + (d.stage + 1) + "번째 쪽지…\n지금까지 " + d.stage + "번이나 속았다!");
+                put(hero, 0.20f);
+                above(bang, hero, 0.20f, "!", 300);
+                dropCard(Mission.demand(d.stage) + "\n— 괴도아빠", 0.66f, 700);
+                return 6500;
             default:
-                caption.setText(name + ", 출동!\n단서 " + d.need() + "개를 모으면 쪼코를 찾을 수 있다.");
+                caption.setText(name + ", 출동!\n시키는 대로 하면 쪼코를 풀어 준다는데…");
                 put(hero, 0.5f);
                 bob(hero, 10, 380, 0);
                 above(bubble, hero, 0.5f, "쪼코야, 기다려!", 300);
@@ -332,42 +355,37 @@ public class IntroActivity extends Activity {
         }
     }
 
-    private long rescueScene(int n, String name) {
-        title.setText("쪼코 구출 작전  ·  성공!");
+    /** 요구를 들어주고 쪼코를 풀어 달라고 하지만, 괴도 가족은 핑계를 대고 다음 요구를 내놓는다 */
+    private long trickScene(int n, String name) {
+        title.setText("괴도의 약속  ·  " + d.stage + "번째");
         switch (n) {
             case 0:
-                caption.setText("단서를 모두 모았다!\n" + name + "이 괴도의 비밀 아지트를 찾아냈다.");
-                put(thief, 0.70f);
-                put(mom, 0.90f);
-                put(dog, 0.50f);
+                caption.setText(name + ": \"시키는 대로 했어요!\n(" + doneTask + ")\n이제 쪼코를 풀어 주세요!\"");
+                put(thief, 0.64f);
+                put(dog, 0.78f);
+                put(mom, 0.92f);
                 put(hero, -0.25f);
-                walk(hero, 0.16f, 300, 1500);
-                above(bang, thief, 0.70f, "!", 1900);
-                return 4400;
+                walk(hero, 0.16f, 200, 1300);
+                bob(dog, 12, 220, 1200);
+                above(bubble, dog, 0.78f, "멍멍!", 1500);
+                return 5200;
             case 1:
-                caption.setText("\"멍멍!\"\n쪼코가 달려온다!");
-                put(thief, 0.70f);
-                put(mom, 0.90f);
+                caption.setText("괴도아빠: \"" + excuse + "\"");
                 put(hero, 0.16f);
-                put(dog, 0.50f);
-                shake(thief, 0);
-                shake(mom, 100);
-                above(bubble, thief, 0.74f, "들켰다!", 100);
-                walk(dog, 0.36f, 500, 900);
-                bob(dog, 14, 200, 500);
-                return 4400;
+                put(thief, 0.64f);
+                put(dog, 0.78f);
+                put(mom, 0.92f);
+                bob(thief, 6, 160, 0);
+                bob(mom, 6, 160, 80);
+                above(bubble, thief, 0.60f, "후후후…", 200);
+                above(bang, hero, 0.16f, "?!", 1200);
+                return 6000;
             default:
-                caption.setText("쪼코 구출 성공!  (" + d.rescued + "번째)\n오늘은 쪼코와 함께 있어요.");
-                put(hero, 0.38f);
-                put(dog, 0.60f);
-                put(thief, 0.70f);
+                caption.setText("괴도엄마: \"호호, 이것만 더 하면 정말 풀어 줄게요~\"\n(그래도 수고했으니 단서 +" + Mission.BONUS + "개)");
+                put(hero, 0.14f);
                 put(mom, 0.90f);
-                dash(thief, 1.5f, 200);
-                dash(mom, 1.4f, 300);
-                bob(hero, 10, 360, 0);
-                bob(dog, 12, 260, 100);
-                above(bubble, thief, 0.74f, "다음엔 더 꼭꼭 숨겨 주마!", 0);
-                later(1700, () -> bubble.animate().alpha(0f).setStartDelay(0).setDuration(300).start());
+                bob(mom, 5, 300, 0);
+                dropCard(Mission.demand(d.stage) + "\n— 괴도아빠", 0.52f, 300);
                 return 0;
         }
     }

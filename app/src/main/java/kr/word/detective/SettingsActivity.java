@@ -51,7 +51,7 @@ public class SettingsActivity extends SubActivity {
 
         LinearLayout story = Ui.card(page);
         story.addView(Ui.heading(this, "인트로 만화"));
-        Ui.choice(story, "앱을 열 때 인트로 만화 보기 (쪼코가 잡혀 있는 동안)", d.intro, () -> { d.intro = !d.intro; Store.save(this); render(); });
+        Ui.choice(story, "앱을 열 때 인트로 만화 보기", d.intro, () -> { d.intro = !d.intro; Store.save(this); render(); });
         Ui.button(story, "인트로 만화 다시 보기", Ui.BTN_PLAIN, () -> startActivity(new android.content.Intent(this, IntroActivity.class)));
 
         LinearLayout up = Ui.card(page);
