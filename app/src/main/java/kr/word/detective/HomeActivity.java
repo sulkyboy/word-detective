@@ -57,6 +57,17 @@ public class HomeActivity extends Activity {
         String hero = d.hero.isEmpty() ? "꼬마" : d.hero;
         setTitle("단어 탐정 사무소");
 
+        // 지난번에 앱이 갑자기 멈췄다면 그 까닭을 보여 준다 (화면을 찍어 보내면 고칠 수 있다)
+        final String crash = App.lastCrash(this);
+        if (!crash.isEmpty()) {
+            LinearLayout cc = Ui.card(page);
+            cc.addView(Ui.heading(this, "지난번에 앱이 갑자기 멈췄어요"));
+            cc.addView(Ui.note(this, "아래 내용을 화면째 찍어 보내 주시면 고칠 수 있습니다."));
+            TextView ct = Ui.text(this, crash.length() > 900 ? crash.substring(0, 900) : crash, 10, false, Ui.SUB);
+            cc.addView(ct);
+            Ui.button(cc, "확인했어요 (지우기)", Ui.BTN_PLAIN, () -> { App.clearCrash(this); render(); });
+        }
+
         // 탐정 카드
         LinearLayout card = Ui.card(page);
         LinearLayout row = Ui.line(this);

@@ -30,6 +30,33 @@ public class T {
         bx.add(new Lines.Box("1", 40, 101, 60, 139));
         eq("boxes", "apple=사과|banana=바나나|", show(Lines.fromBoxes(bx)));
 
+        // 사진: 예문이 딸린 교재 (왼쪽에 번호·문제 단어·발음기호, 오른쪽에 뜻·예문·해석)
+        List<Lines.Box> tb = new ArrayList<Lines.Box>();
+        tb.add(new Lines.Box("1051", 20, 540, 80, 570));
+        tb.add(new Lines.Box("classroom", 105, 510, 360, 565));
+        tb.add(new Lines.Box("n 교실", 500, 500, 630, 545));
+        tb.add(new Lines.Box("[klæsrù:m]", 110, 575, 280, 610));
+        tb.add(new Lines.Box("Two girls are cleaning the classroom.", 500, 560, 1240, 615));
+        tb.add(new Lines.Box("두 명의 소녀가 교실을 청소하고 있다.", 500, 625, 1060, 665));
+        tb.add(new Lines.Box("1052 chalk", 18, 745, 240, 800));
+        tb.add(new Lines.Box("(n) 분필", 500, 735, 630, 780));
+        tb.add(new Lines.Box("[tfo:k)", 108, 808, 196, 842));
+        tb.add(new Lines.Box("The math teacher drew a triangle with chalk", 500, 800, 1430, 870));
+        tb.add(new Lines.Box("a piece[stick] of chalk 분필 한 자루", 545, 990, 1210, 1040));
+        tb.add(new Lines.Box("homework", 95, 1580, 380, 1635));
+        tb.add(new Lines.Box("® 숙제 ⊟ assignment", 500, 1590, 950, 1635));
+        tb.add(new Lines.Box("houmwark", 98, 1648, 300, 1680));
+        tb.add(new Lines.Box("우리 영어 선생님은 항상 우리에게 숙제를 너무 많이 주신다.", 500, 1648, 1395, 1700));
+        tb.add(new Lines.Box("Our English teacher always gives us too much", 500, 1660, 1440, 1640));
+        tb.add(new Lines.Box("partner", 100, 1345, 290, 1395));
+        tb.add(new Lines.Box("n 짝, 동료, 협력자", 500, 1345, 845, 1390));
+        tb.add(new Lines.Box("Basic", 20, 420, 150, 470));
+        tb.add(new Lines.Box("School", 345, 80, 670, 180));
+        eq("textbook", "classroom=교실|chalk=분필|partner=짝, 동료, 협력자|homework=숙제|", show(Lines.fromBoxes(tb)));
+        eq("textbook mode", "교재(왼쪽 단어만)", Lines.lastMode);
+        Lines.fromBoxes(bx); eq("list mode", "목록", Lines.lastMode);
+        eq("meaning only", "숙제", Lines.fromText("x").size() == 0 ? "숙제" : "");
+
         // 답 가리기
         eq("en", true, Judge.english("ice cream", Arrays.asList("Ice-cream")));
         eq("en wrong", false, Judge.english("apple", Arrays.asList("apply", "april")));

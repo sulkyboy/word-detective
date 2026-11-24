@@ -39,7 +39,8 @@ public class EditActivity extends SubActivity {
         LinearLayout top = Ui.card(page);
         if (deck == null) {
             top.addView(Ui.heading(this, "읽어 온 단어 " + src.size() + "개"));
-            top.addView(Ui.note(this, "잘못 읽은 글자는 눌러서 고치고, 필요 없는 줄은 ✕ 로 지워 주세요. 뜻이 빈 줄은 뜻을 넣어야 문제로 나옵니다."));
+            top.addView(Ui.note(this, "잘못 읽은 글자는 눌러서 고치고, 필요 없는 줄은 ✕ 로 지워 주세요. 뜻이 빈 줄은 뜻을 넣어야 문제로 나옵니다. 다 보았으면 맨 아래 [저장]을 눌러 주세요."));
+            Ui.button(top, "이대로 저장", Ui.BTN_PRIMARY, this::save);
         }
         top.addView(Ui.label(this, "단어장 이름"));
         name = Ui.input(this, "예: Day 1, 3단원", false);
@@ -102,7 +103,8 @@ public class EditActivity extends SubActivity {
         }
         String title = name.getText().toString().trim();
         if (title.isEmpty()) title = "이름 없는 단어장";
-        if (deck == null) {
+        boolean fresh = deck == null;
+        if (fresh) {
             deck = new Deck();
             deck.id = d.nextId++;
             d.decks.add(deck);
@@ -113,6 +115,8 @@ public class EditActivity extends SubActivity {
         deck.words.addAll(out);
         Store.save(this);
         Toast.makeText(this, "단어 " + out.size() + "개를 저장했어요.", Toast.LENGTH_SHORT).show();
+        // 새로 만든 단어장은 바로 그 단어장 화면으로 (거기서 [도전장 받기]로 문제를 푼다)
+        if (fresh) startActivity(new android.content.Intent(this, DeckActivity.class).putExtra("deck", deck.id).putExtra("fresh", true));
         finish();
     }
 }

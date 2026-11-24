@@ -256,6 +256,19 @@ rm -f "$OUT/seed_intro.json" "$OUT/seed_trick.json"
 adb shell mkdir -p /sdcard/Android/data/$PKG/files
 adb push tools/ocr_test.png /sdcard/Android/data/$PKG/files/test.png
 start OcrTestActivity;   shot 50_ocr 20
+adb push tools/ocr_test2.jpg /sdcard/Android/data/$PKG/files/test2.jpg
+adb shell am force-stop $PKG
+start OcrTestActivity --es file test2.jpg;   shot 51_ocr_textbook 20
+swipe_up;                shot 52_ocr_textbook_raw 1.5
+
+# ---- 7) 새 단어장을 저장하면 바로 그 단어장 화면으로, 거기서 문제 풀이로
+seed "$OUT/seed.json"
+start DecksActivity;     sleep 2
+tap "직접 입력하거나 붙여넣기"; sleep 1.5
+adb shell input text "river"; sleep 0.5
+tap "다음";              shot 70_new_deck_edit 2
+tap "이대로 저장";       shot 71_after_save 2.5
+tap "이 단어장으로 도전장 받기";  shot 72_study_from_new_deck 2.5
 
 # ---- 기록: 앱이 죽은 흔적
 adb logcat -d > "$OUT/logcat_all.txt" 2>/dev/null
