@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- tools/art/ch_thief.svg 에서 만든 파일 (tools/svg2vd.py). 직접 고치지 말 것 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="75dp" android:height="101dp"
+    android:viewportWidth="150" android:viewportHeight="202">
+    <group android:translateX="-204" android:translateY="-62">
+        <path android:pathData="M217,252a48,6 0 1,0 96,0a48,6 0 1,0 -96,0z" android:fillColor="#22000000" />
+        <path android:pathData="M222 180q43-18 86 0l10 60q-53 14-106 0z" android:fillColor="#FF3A2A55" />
+        <path android:pathData="M257,168h16a26,26 0 0,1 26,26v22a26,26 0 0,1 -26,26h-16a26,26 0 0,1 -26,-26v-22a26,26 0 0,1 26,-26z" android:fillColor="#FF1E1E24" />
+        <path android:pathData="M233 192h64M232 212h66" android:strokeColor="#FF3A3A44" android:strokeWidth="2" />
+        <path android:pathData="M234,246a15,8 0 1,0 30,0a15,8 0 1,0 -30,0z" android:fillColor="#FF2A2A30" />
+        <path android:pathData="M266,246a15,8 0 1,0 30,0a15,8 0 1,0 -30,0z" android:fillColor="#FF2A2A30" />
+        <path android:pathData="M312 100l26-10l-6 16l14 8l-30 2z" android:fillColor="#FFD7372F" />
+        <path android:pathData="M217,128a48,48 0 1,0 96,0a48,48 0 1,0 -96,0z" android:fillColor="#FFEFC6A4" />
+        <path android:pathData="M218 118q0-40 47-40t47 40q-10-18-24-20l-8 8l-10-10l-10 10l-10-8q-20 2-32 20z" android:fillColor="#FF2B2420" />
+        <path android:pathData="M218 104q47-14 94 0v14q-47-12-94 0z" android:fillColor="#FFD7372F" />
+        <path android:pathData="M256 106l9-6l9 6l-9 6z" android:fillColor="#FFFFD54A" />
+        <path android:pathData="M221 128q44-10 88 0v18q-22 6-38-6h-12q-16 12-38 6z" android:fillColor="#FF17171C" />
+        <path android:pathData="M239,137a7,5 0 1,0 14,0a7,5 0 1,0 -14,0z" android:fillColor="#FFffffff" />
+        <path android:pathData="M277,137a7,5 0 1,0 14,0a7,5 0 1,0 -14,0z" android:fillColor="#FFffffff" />
+        <path android:pathData="M243.5,137a3.5,3.5 0 1,0 7,0a3.5,3.5 0 1,0 -7,0z" android:fillColor="#FF2B2420" />
+        <path android:pathData="M281.5,137a3.5,3.5 0 1,0 7,0a3.5,3.5 0 1,0 -7,0z" android:fillColor="#FF2B2420" />
+        <path android:pathData="M254 159q12 8 24-3" android:strokeColor="#FF8A4B3A" android:strokeWidth="2.5" android:strokeLineCap="round" />
+        <path android:pathData="M300 194l24 5l-7 33l-24-5z" android:fillColor="#FFFFFDF2" android:strokeColor="#FFC9A227" android:strokeWidth="2" />
+        <path android:pathData="M303 208l10 2M302 215l10 2" android:strokeColor="#FFC9A227" android:strokeWidth="2" />
+        <path android:pathData="M290,222a8,8 0 1,0 16,0a8,8 0 1,0 -16,0z" android:fillColor="#FFEFC6A4" />
+    </group>
+</vector>
