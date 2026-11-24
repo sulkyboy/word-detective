@@ -24,7 +24,8 @@ public final class Lines {
     /**
      * 사진에서 읽은 글자 덩어리들을 단어–뜻 짝으로.
      * 같은 높이에 있는 덩어리들을 한 줄로 모은 다음(영어 칸과 뜻 칸이 따로 읽히기 때문),
-     *  - 예문이 딸린 교재 모양이면: 왼쪽 칸의 문제 단어와 그 줄의 뜻만 가져온다 (예문·해석·발음기호는 버림)
+     *  - 첫 번째 기준: [번호] [영어 단어] … [한글 뜻] 줄 (지금 쓰는 교재의 모양)
+     *  - 예문이 딸린 교재 모양이면: 왼쪽 칸의 문제 단어와 그 줄의 뜻도 가져온다 (예문·해석·발음기호는 버림)
      *  - 단어와 뜻만 나란히 적힌 목록이면: 줄마다 짝을 찾는다
      */
     public static List<Word> fromBoxes(List<Box> boxes) {
@@ -36,13 +37,30 @@ public final class Lines {
             for (Box b : row) s.append(s.length() > 0 ? "  " : "").append(b.text);
             lines.add(s.toString());
         }
+        // 첫 번째 기준: 왼쪽부터 [번호] [영어 단어] 가 있고 그 오른쪽에 한글 뜻이 있는 줄
+        List<Hit> hits = numbered(rows);
+        boolean byNumber = hits.size() >= 2;
+        // 두 번째 기준(예문이 딸린 교재): 왼쪽 칸의 문제 단어. 번호가 잘렸거나 안 읽힌 단어를 채운다
         if (hasSentences(boxes)) {
-            List<Word> w = headwords(rows, boxes);
-            if (w.size() >= 2) {
-                lastLines = lines;
-                lastMode = "교재(왼쪽 단어만)";
-                return uniq(w);
+            List<Hit> more = headwords(rows, boxes);
+            if (!byNumber && more.size() >= 2) hits.clear();
+            if (byNumber || more.size() >= 2) {
+                for (Hit h : more) {
+                    boolean dup = false;
+                    for (Hit o : hits) if (o.row == h.row || o.word.en.equalsIgnoreCase(h.word.en)) dup = true;
+                    if (!dup) hits.add(h);
+                }
             }
+        }
+        if (hits.size() >= 2) {
+            Collections.sort(hits, new Comparator<Hit>() {
+                public int compare(Hit x, Hit y) { return x.row - y.row; }
+            });
+            List<Word> w = new ArrayList<Word>();
+            for (Hit h : hits) w.add(h.word);
+            lastLines = lines;
+            lastMode = byNumber ? "번호+단어+뜻" : "교재(왼쪽 단어만)";
+            return uniq(w);
         }
         List<Word> out = fromLines(lines);
         lastMode = "목록";
@@ -89,8 +107,56 @@ public final class Lines {
         return n >= 2;
     }
 
+    /** 찾은 단어와 그 단어가 있던 줄 (사진의 위에서 아래 순서를 지키려고) */
+    private static final class Hit {
+        final Word word;
+        final int row;
+        Hit(Word word, int row) { this.word = word; this.row = row; }
+    }
+
+    private static final Pattern NUMBER_HEAD = Pattern.compile("^[^0-9]{0,8}?\\d{3,4}[\\)\\].:]?\\s*(.*)$");
+
+    /**
+     * 번호 기준: 줄의 왼쪽부터 [번호 3~4자리] [영어 단어] 가 오고, 그 오른쪽 덩어리에 한글 뜻이 있다.
+     *   "3036 measure   ⓥ 측정하다, 재다"  →  measure = 측정하다, 재다
+     * 번호 앞의 체크 칸(□)이 '그'·'ㅁ'·'D' 따위로 읽힌 것은 건너뛴다. 예문·해석·발음기호·파생어 줄에는 번호가 없어서 걸리지 않는다.
+     */
+    private static List<Hit> numbered(List<List<Box>> rows) {
+        List<Hit> out = new ArrayList<Hit>();
+        for (int r = 0; r < rows.size(); r++) {
+            List<Box> row = rows.get(r);
+            int i = 0;
+            while (i < row.size()) {        // 번호 앞의 짧은 잡티(체크 칸)는 건너뛴다
+                String t = row.get(i).text.trim();
+                if (t.matches(".*[0-9].*") || hasLatin(t) || t.length() > 3) break;
+                i++;
+            }
+            if (i >= row.size()) continue;
+            Matcher m = NUMBER_HEAD.matcher(row.get(i).text.trim());
+            if (!m.find()) continue;
+            String after = m.group(1).trim();
+            int headBox = i;
+            if (after.isEmpty()) {          // 번호와 단어가 따로 읽힌 경우
+                headBox = i + 1;
+                if (headBox >= row.size()) continue;
+                after = row.get(headBox).text.trim();
+            }
+            if (isPronunciation(after)) continue;
+            int[] hw = headWord(after);
+            if (hw == null || hw[0] != 0) continue;
+            String en = english(after.substring(0, hw[1]));
+            if (en.isEmpty() || en.split(" ").length > 3) continue;
+            if (firstHangul(after.substring(hw[1])) >= 0) continue;   // 단어에 한글이 바로 붙은 줄은 뜻 칸이 아니다 (쪽 번호 + 책 이름)
+            StringBuilder rest = new StringBuilder();
+            for (int k = headBox + 1; k < row.size(); k++) rest.append("  ").append(row.get(k).text);
+            String ko = meaningOnly(rest.toString());
+            if (!ko.isEmpty()) out.add(new Hit(new Word(en, ko), r));
+        }
+        return out;
+    }
+
     /** 교재 모양: 왼쪽 칸에서 시작하는 짧은 영어(문제 단어)와, 같은 줄 오른쪽의 한글 뜻 */
-    private static List<Word> headwords(List<List<Box>> rows, List<Box> boxes) {
+    private static List<Hit> headwords(List<List<Box>> rows, List<Box> boxes) {
         List<Integer> lefts = new ArrayList<Integer>();
         int maxRight = 0;
         for (Box b : boxes) {
@@ -98,13 +164,14 @@ public final class Lines {
             lefts.add(b.left);
             maxRight = Math.max(maxRight, b.right);
         }
-        if (lefts.isEmpty()) return new ArrayList<Word>();
+        if (lefts.isEmpty()) return new ArrayList<Hit>();
         Collections.sort(lefts);
         int minLeft = lefts.get(lefts.size() / 10);      // 맨 왼쪽 몇 개(쪽 번호, 잘못 읽힌 얼룩)에 휘둘리지 않게
         int limit = minLeft + (maxRight - minLeft) * 28 / 100;       // 왼쪽 칸의 범위
-        List<Word> out = new ArrayList<Word>();
+        List<Hit> out = new ArrayList<Hit>();
         Box above = null;      // 바로 앞에서 찾은 문제 단어의 자리
-        for (List<Box> row : rows) {
+        for (int r = 0; r < rows.size(); r++) {
+            List<Box> row = rows.get(r);
             for (int i = 0; i < row.size(); i++) {
                 Box b = row.get(i);
                 if (!hasLatin(b.text)) {
@@ -124,7 +191,7 @@ public final class Lines {
                 StringBuilder rest = new StringBuilder();
                 for (int k = i + 1; k < row.size(); k++) if (row.get(k).left > limit) rest.append("  ").append(row.get(k).text);
                 String ko = meaningOnly(rest.toString());
-                if (!ko.isEmpty()) { out.add(new Word(en, ko)); above = b; }
+                if (!ko.isEmpty()) { out.add(new Hit(new Word(en, ko), r)); above = b; }
                 break;
             }
         }

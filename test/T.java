@@ -80,11 +80,20 @@ public class T {
         ph.add(new Lines.Box("James 교수는 학생들에게 최선을 다하", 860, 1415, 1450, 1465));
         ph.add(new Lines.Box("216 Word Master 중등 실력", 275, 2372, 752, 2420));
         eq("photo", "evaluate=평가하다|submit=제출하다|instruct=교수하다, 가르치다|absent=결석한|", show(Lines.fromBoxes(ph)));
-        eq("photo mode", "교재(왼쪽 단어만)", Lines.lastMode);
+        eq("photo mode", "번호+단어+뜻", Lines.lastMode);
+        // 번호 기준만으로: 예문이 한 줄뿐이라 교재로 보지 않는 경우에도 번호 줄은 찾는다
+        List<Lines.Box> nb = new ArrayList<Lines.Box>();
+        nb.add(new Lines.Box("D3040 empty", 237, 1584, 559, 1672)); nb.add(new Lines.Box("@비어 있는 + full 가득 찬", 798, 1607, 1333, 1671));
+        nb.add(new Lines.Box("남3042", 217, 2223, 319, 2262)); nb.add(new Lines.Box("season", 349, 2240, 542, 2280)); nb.add(new Lines.Box("@ 계절", 775, 2236, 911, 2285));
+        nb.add(new Lines.Box("[sí:zn]", 354, 2290, 454, 2323)); nb.add(new Lines.Box("216 My Word Book 중등 실력", 191, 2504, 806, 2570));
+        nb.add(new Lines.Box("be empty of ~이 없다.", 842, 1811, 1275, 1872));
+        eq("numbered", "empty=비어 있는|season=계절|", show(Lines.fromBoxes(nb)));
+        eq("numbered mode", "번호+단어+뜻", Lines.lastMode);
+
         // 실제 글자 인식(ML Kit)이 시험 그림에서 돌려준 덩어리들 그대로
         eq("ocr photo-like", "measure=측정하다, 재다|deliver=배달하다|harbor=항구|protect=보호하다, 지키다|empty=비어 있는|repair=수리하다, 고치다|season=계절|", show(Lines.fromBoxes(load("boxes_photo_like.txt"))));
         eq("ocr textbook", "garden=정원, 뜰|bridge=다리|borrow=빌리다|quiet=조용한|neighbor=이웃, 이웃 사람|weekend=주말|", show(Lines.fromBoxes(load("boxes_textbook.txt"))));
-        eq("textbook mode", "교재(왼쪽 단어만)", Lines.lastMode);
+        eq("textbook mode", "번호+단어+뜻", Lines.lastMode);
         Lines.fromBoxes(bx); eq("list mode", "목록", Lines.lastMode);
         eq("meaning only", "숙제", Lines.fromText("x").size() == 0 ? "숙제" : "");
 
