@@ -1,0 +1,32 @@
+[216,168][566,256] TextView Day 1 (3단원)
+[84,296][797,319] TextView apple
+[84,319][797,377] TextView 사과
+[821,296][996,342] TextView ☆☆☆☆☆
+[84,425][797,490] TextView beautiful
+[84,490][797,548] TextView 아름다운
+[821,459][996,513] TextView ★☆☆☆☆
+[84,596][797,661] TextView library
+[84,661][797,719] TextView 도서관
+[821,630][996,684] TextView ★★☆☆☆
+[84,767][797,832] TextView run
+[84,832][797,890] TextView 달리다, 뛰다
+[821,801][996,855] TextView ★★★☆☆
+[84,938][797,1003] TextView vegetable
+[84,1003][797,1061] TextView 채소
+[821,972][996,1026] TextView ★★★★☆
+[84,1109][797,1174] TextView remember
+[84,1174][797,1232] TextView 기억하다
+[821,1143][996,1197] TextView ☆☆☆☆☆
+[84,1280][797,1345] TextView get up
+[84,1345][797,1403] TextView 일어나다
+[821,1314][996,1368] TextView ★☆☆☆☆
+[84,1451][854,1516] TextView weather
+[84,1516][854,1574] TextView 날씨
+[878,1483][996,1541] TextView 새 단어
+[84,1622][854,1687] TextView different
+[84,1687][854,1745] TextView 다른
+[878,1654][996,1712] TextView 새 단어
+[84,1793][854,1858] TextView important
+[84,1858][854,1916] TextView 중요한
+[878,1825][996,1883] TextView 새 단어
+[42,2012][1038,2172] TextView 이 단어장 지우기

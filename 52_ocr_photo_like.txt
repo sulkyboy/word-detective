@@ -1,0 +1,40 @@
+[48,168][408,256] TextView 글자 인식 시험
+[42,338][1038,409] TextView file test3.jpg exists=true
+[42,409][1038,467] TextView words 7 mode 번호+단어+뜻
+[42,467][1038,525] TextView measure = 측정하다, 재다
+[42,525][1038,583] TextView deliver = 배달하다
+[42,583][1038,641] TextView harbor = 항구
+[42,641][1038,699] TextView protect = 보호하다, 지키다
+[42,699][1038,757] TextView empty = 비어 있는
+[42,757][1038,815] TextView repair = 수리하다, 고치다
+[42,815][1038,873] TextView season = 계절
+[42,873][1038,922] TextView raw: 우리는 엄격한 모임 규칙을 따라야
+[42,922][1038,971] TextView raw: @ permission 허락, 허개
+[42,971][1038,1015] TextView raw: Advanced
+[42,1015][1038,1064] TextView raw: 3036 measure  0 측정하다, 재다
+[42,1064][1038,1108] TextView raw: [mézər]  The nurse useda smallruler
+[42,1108][1038,1157] TextView raw: 간호사는 작은 자로 모든 아이의 키를 3
+[42,1157][1038,1206] TextView raw: meaSurement () 측정
+[42,1206][1038,1255] TextView raw: 3037 deliver  O배달하다 bring
+[42,1255][1038,1299] TextView raw: [dilívər]
+[42,1299][1038,1343] TextView raw: We are going to deliver these
+[42,1343][1038,1392] TextView raw: 우리는 오늘 밤 가게가 닫기 전에이 상져
+[42,1392][1038,1441] TextView raw: delivery 배달
+[42,1441][1038,1490] TextView raw: 금
+[42,1490][1038,1539] TextView raw: 3038 harbor  항구
+[42,1539][1038,1583] TextView raw: [há:rbər]  The harbor will be full of fishir
+[42,1583][1038,1632] TextView raw: 그 항구는 이른 아침에 고깃배로 가득 찰
+[42,1632][1038,1676] TextView raw: D
+[42,1676][1038,1725] TextView raw: 3039 protect  O 보호하다 . 지키다 tattack
+[42,1725][1038,1769] TextView raw: Ipratékt]  Captain Miller protects the villa
+[42,1769][1038,1818] TextView raw: Miller 선장은 겨울마다 폭풍으로부터 마
+[42,1818][1038,1867] TextView raw: protection 보호, 방어 pro
+[42,1867][1038,1916] TextView raw: D3040 empty  @비어 있는 + full 가득 찬
+[42,1916][1038,1960] TextView raw: [émpti]  The bottle was empty after the
+[42,1960][1038,2009] TextView raw: 햇볕 속에서 오래 걸은 뒤 병은 비어 있었다
+[42,2009][1038,2058] TextView raw: be empty of ~이 없다.
+[42,2058][1038,2107] TextView raw: 3041 repair  수리하다 . 고치다
+[42,2107][1038,2151] TextView raw: [ripéər]  One day Tommy stopped by to r
+[42,2151][1038,2200] TextView raw: 어느 날 Tommy는 마당의 부서진 울타리틀
+[42,2200][1038,2249] TextView raw: @repairman 수리공
+[42,2249][1038,2256] TextView raw: 남3042  season  @ 계절

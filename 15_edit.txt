@@ -1,0 +1,31 @@
+[216,168][633,256] TextView 단어 확인·고치기
+[84,410][996,520] TextView 단어장 이름
+[84,520][996,661] EditText Day 1 (3단원)
+[84,775][996,857] TextView 단어
+[84,875][429,1016] EditText apple
+[447,875][861,1016] EditText 사과
+[879,887][996,1004] TextView ✕
+[84,1034][429,1175] EditText beautiful
+[447,1034][861,1175] EditText 아름다운
+[879,1046][996,1163] TextView ✕
+[84,1193][429,1334] EditText library
+[447,1193][861,1334] EditText 도서관
+[879,1205][996,1322] TextView ✕
+[84,1352][429,1493] EditText run
+[447,1352][861,1493] EditText 달리다, 뛰다
+[879,1364][996,1481] TextView ✕
+[84,1511][429,1652] EditText vegetable
+[447,1511][861,1652] EditText 채소
+[879,1523][996,1640] TextView ✕
+[84,1670][429,1811] EditText remember
+[447,1670][861,1811] EditText 기억하다
+[879,1682][996,1799] TextView ✕
+[84,1829][429,1970] EditText get up
+[447,1829][861,1970] EditText 일어나다
+[879,1841][996,1958] TextView ✕
+[84,1988][429,2129] EditText weather
+[447,1988][861,2129] EditText 날씨
+[879,2000][996,2117] TextView ✕
+[84,2147][429,2256] EditText different
+[447,2147][861,2256] EditText 다른
+[879,2159][996,2256] TextView ✕

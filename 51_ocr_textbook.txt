@@ -1,0 +1,33 @@
+[48,168][408,256] TextView 글자 인식 시험
+[42,338][1038,409] TextView file test2.jpg exists=true
+[42,409][1038,467] TextView words 6 mode 번호+단어+뜻
+[42,467][1038,525] TextView garden = 정원, 뜰
+[42,525][1038,583] TextView bridge = 다리
+[42,583][1038,641] TextView borrow = 빌리다
+[42,641][1038,699] TextView quiet = 조용한
+[42,699][1038,757] TextView neighbor = 이웃, 이웃 사람
+[42,757][1038,815] TextView weekend = 주말
+[42,815][1038,859] TextView raw: Day
+[42,859][1038,903] TextView raw: Town
+[42,903][1038,947] TextView raw: 41
+[42,947][1038,991] TextView raw: Basic
+[42,991][1038,1040] TextView raw: 2101 garden  정원, 뜰
+[42,1040][1038,1084] TextView raw: [gá:rdn]  My uncle grows tomatoes in his small garden.
+[42,1084][1038,1133] TextView raw: 삼촌은 작은 정원에서 토마토를 기르신다.
+[42,1133][1038,1182] TextView raw: 2102  bridge  다리
+[42,1182][1038,1226] TextView raw: [brídg]  We walked across the old stone bridge together.
+[42,1226][1038,1275] TextView raw: 우리는 오래된 돌다리를 함께 걸어서 건났다.
+[42,1275][1038,1324] TextView raw: cross a bridge 다리를 건너다.
+[42,1324][1038,1373] TextView raw: 2103 borrow  O 빌리다
+[42,1373][1038,1417] TextView raw: [bárou]  Can I borrow your blue pencil for a minute?
+[42,1417][1038,1466] TextView raw: 네 파란 연필을 잠깐 빌려도 될까?
+[42,1466][1038,1515] TextView raw: 2104  quiet  조용한 silent
+[42,1515][1038,1559] TextView raw: [kwáiet]  The library was so quiet that I fell asleep.
+[42,1559][1038,1608] TextView raw: 도서관이 너무 조용해서 나는 잠이 들었다.
+[42,1608][1038,1657] TextView raw: 2105  neighbor  이웃, 이웃 사람
+[42,1657][1038,1701] TextView raw: [néibər]  Our new neighbor brought us a warm apple pie.
+[42,1701][1038,1750] TextView raw: 새 이웃이 우리에게 파뜻한 사과 파이를 가져다주었다.
+[42,1750][1038,1799] TextView raw: next-door neighbor 옆집 사람
+[42,1799][1038,1848] TextView raw: 2106 weekend  주말
+[42,1848][1038,1892] TextView raw: [wí:kènd]  What  are you going to do this weekend?
+[42,1892][1038,1941] TextView raw: 너는 이번 주말에 무엇을 할 거니?

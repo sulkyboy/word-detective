@@ -1,0 +1,24 @@
+[48,168][408,256] TextView 글자 인식 시험
+[42,338][1038,409] TextView file test.png exists=true
+[42,409][1038,467] TextView words 10 mode 목록
+[42,467][1038,525] TextView apple = 사과
+[42,525][1038,583] TextView beautiful = 아름다운
+[42,583][1038,641] TextView library = 도서관
+[42,641][1038,699] TextView run = 달리다, 뛰다
+[42,699][1038,757] TextView vegetable = 채소
+[42,757][1038,815] TextView remember = 기억하다
+[42,815][1038,873] TextView get up = 일어나다
+[42,873][1038,931] TextView weather = 날씨
+[42,931][1038,989] TextView different = 다른
+[42,989][1038,1047] TextView important = 중요한
+[42,1047][1038,1096] TextView raw: Day 1 영단어 테스트
+[42,1096][1038,1145] TextView raw: 1 1  apple  [æpl]  사과
+[42,1145][1038,1194] TextView raw: 2  beautiful  [bjúMtfX)  아름다운
+[42,1194][1038,1243] TextView raw: 3  library  [láibrèri]  도서관
+[42,1243][1038,1292] TextView raw: 4  run  [rn]  달리다, 뛰다
+[42,1292][1038,1341] TextView raw: 5  vegetable  [védtbl]  채소
+[42,1341][1038,1390] TextView raw: 6 remember  [rimémbrl  기억하다
+[42,1390][1038,1439] TextView raw: 7  get up  일어나다.
+[42,1439][1038,1488] TextView raw: weather  [wéð rl  날씨
+[42,1488][1038,1537] TextView raw: different  [dífXrXnt)  다른
+[42,1537][1038,1586] TextView raw: 10 important  [imprtnt]  중요한

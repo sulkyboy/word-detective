@@ -1,0 +1,15 @@
+[216,168][451,256] TextView 짝 맞추기
+[235,374][1038,436] TextView 괴도아빠
+[235,436][1038,635] TextView 증거 카드를 뒤섞어 놓았다! 영어 단어와 뜻을 짝지어 보거라.
+[42,659][528,854] TextView vegetable
+[552,659][1038,854] TextView 채소
+[42,878][528,1073] TextView weather
+[552,878][1038,1073] TextView 사과
+[42,1097][528,1289] TextView beautiful
+[552,1097][1038,1289] TextView important
+[42,1313][528,1508] TextView 아름다운
+[552,1313][1038,1508] TextView apple
+[42,1532][528,1727] TextView library
+[552,1532][1038,1727] TextView 중요한
+[42,1751][528,1943] TextView 도서관
+[552,1751][1038,1943] TextView 날씨
