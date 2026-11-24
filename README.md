@@ -29,7 +29,9 @@
 - `core/` : 안드로이드와 무관한 계산 (사진 글자 → 단어 짝 `Lines`, 채점 `Judge`, 복습 `Srs`, 출제 `Quiz`, 저장 형식 `Data`). 시험: `test/T.java`
 - 화면은 모두 코드로 만든다(`Ui.java`). 저장은 앱 안 파일 하나(`data.json`, `Store.java`)
 - `main`에 올리면 GitHub Actions가 설치 파일(word-detective.apk)을 만들어 `apk` 브랜치에 올리고, 앱이 거기서 새 버전을 받는다(`Updater.java`). 그래서 저장소는 공개
-- 로컬 시험: `javac -d /tmp/wd app/src/main/java/kr/word/detective/core/*.java test/T.java && java -cp /tmp/wd T`
+- 로컬 시험: `javac -d /tmp/wd app/src/main/java/kr/word/detective/core/*.java test/T.java && (cd test && java -cp /tmp/wd T)`
+- 사진 인식 규칙(`core/Lines.java`): 예문이 딸린 교재는 왼쪽 칸의 문제 단어와 같은 줄 오른쪽 칸의 뜻만. 시험 자료 `test/boxes_*.txt` 는 시험 그림(`tools/ocr_test*.jpg`, 직접 만든 내용)을 실제 ML Kit 에 넣어 얻은 덩어리들
+- 사용자가 보낸 교재 사진은 저장소에 올리지 않는다(교재 지면)
 
 ## 앞으로 할 일
 

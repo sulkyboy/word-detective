@@ -81,6 +81,9 @@ public class T {
         ph.add(new Lines.Box("216 Word Master 중등 실력", 275, 2372, 752, 2420));
         eq("photo", "evaluate=평가하다|submit=제출하다|instruct=교수하다, 가르치다|absent=결석한|", show(Lines.fromBoxes(ph)));
         eq("photo mode", "교재(왼쪽 단어만)", Lines.lastMode);
+        // 실제 글자 인식(ML Kit)이 시험 그림에서 돌려준 덩어리들 그대로
+        eq("ocr photo-like", "measure=측정하다, 재다|deliver=배달하다|harbor=항구|protect=보호하다, 지키다|empty=비어 있는|repair=수리하다, 고치다|season=계절|", show(Lines.fromBoxes(load("boxes_photo_like.txt"))));
+        eq("ocr textbook", "garden=정원, 뜰|bridge=다리|borrow=빌리다|quiet=조용한|neighbor=이웃, 이웃 사람|weekend=주말|", show(Lines.fromBoxes(load("boxes_textbook.txt"))));
         eq("textbook mode", "교재(왼쪽 단어만)", Lines.lastMode);
         Lines.fromBoxes(bx); eq("list mode", "목록", Lines.lastMode);
         eq("meaning only", "숙제", Lines.fromText("x").size() == 0 ? "숙제" : "");
@@ -138,6 +141,18 @@ public class T {
         eq("roundtrip", d.toJson(), e.toJson());
         eq("streak", 1, e.streak); eq("live streak", 0, e.liveStreak(205)); eq("stage kept", 7, e.stage);
         System.out.println(fails == 0 ? "ALL OK" : fails + " FAILED");
+    }
+    static List<Lines.Box> load(String file) {
+        List<Lines.Box> out = new ArrayList<Lines.Box>();
+        try {
+            for (String l : new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(file)), "UTF-8").split("\n")) {
+                if (!l.startsWith("box: ")) continue;
+                int bar = l.indexOf(" | ");
+                String[] n = l.substring(5, bar).split(",");
+                out.add(new Lines.Box(l.substring(bar + 3), Integer.parseInt(n[0]), Integer.parseInt(n[1]), Integer.parseInt(n[2]), Integer.parseInt(n[3])));
+            }
+        } catch (Exception e) { throw new RuntimeException(e); }
+        return out;
     }
     static Quiz.Q fakeSpell(List<Word> pool) {
         // 스펠링 문제가 나올 때까지 만든다

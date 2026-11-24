@@ -53,6 +53,14 @@ public class EditActivity extends SubActivity {
         list.addView(rows);
         for (Word w : src) addRow(w, w.en, w.ko);
         if (src.isEmpty()) addRow(null, "", "");
+        Ui.button(list, "뜻이 빈 줄 모두 지우기", Ui.BTN_PLAIN, () -> {
+            for (int i = fields.size() - 1; i >= 0; i--) {
+                if (!fields.get(i)[1].getText().toString().trim().isEmpty()) continue;
+                rows.removeViewAt(i);
+                fields.remove(i);
+                origin.remove(i);
+            }
+        });
         Ui.button(list, "＋ 단어 한 줄 더하기", Ui.BTN_PLAIN, () -> {
             EditText[] f = addRow(null, "", "");
             f[0].requestFocus();

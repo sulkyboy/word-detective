@@ -102,16 +102,19 @@ public final class Lines {
         Collections.sort(lefts);
         int minLeft = lefts.get(lefts.size() / 10);      // 맨 왼쪽 몇 개(쪽 번호, 잘못 읽힌 얼룩)에 휘둘리지 않게
         int limit = minLeft + (maxRight - minLeft) * 28 / 100;       // 왼쪽 칸의 범위
-        List<Word> found = new ArrayList<Word>();
-        List<Integer> heights = new ArrayList<Integer>();
+        List<Word> out = new ArrayList<Word>();
+        Box above = null;      // 바로 앞에서 찾은 문제 단어의 자리
         for (List<Box> row : rows) {
             for (int i = 0; i < row.size(); i++) {
                 Box b = row.get(i);
                 if (!hasLatin(b.text)) {
                     if (b.left > limit) break;      // 오른쪽 칸에서 시작하는 줄(해석 따위)
-                    continue;                       // 번호, 체크 칸(□ 가 '그'·'ㅁ' 으로 읽히기도 한다)
+                    continue;                       // 번호, 체크 칸(□ 가 '그'·'ㅁ'·'남' 으로 읽히기도 한다)
                 }
                 if (b.left > limit || isPronunciation(b.text)) break;
+                // 문제 단어 바로 밑에 붙어 있는 줄은 발음기호다 (대괄호가 안 읽혀 영어처럼 보일 때)
+                if (above != null && b.top - above.bottom < (above.bottom - above.top) * 8 / 10
+                        && b.top > above.top && b.left < above.right && above.left < b.right) break;
                 String text = clean(b.text);
                 int[] hw = headWord(text);
                 if (hw == null) break;
@@ -121,16 +124,10 @@ public final class Lines {
                 StringBuilder rest = new StringBuilder();
                 for (int k = i + 1; k < row.size(); k++) if (row.get(k).left > limit) rest.append("  ").append(row.get(k).text);
                 String ko = meaningOnly(rest.toString());
-                if (!ko.isEmpty()) { found.add(new Word(en, ko)); heights.add(b.bottom - b.top); }
+                if (!ko.isEmpty()) { out.add(new Word(en, ko)); above = b; }
                 break;
             }
         }
-        // 문제 단어는 글자가 크다: 다른 것들보다 눈에 띄게 작은 것(잘못 읽힌 발음기호 따위)은 뺀다
-        List<Integer> sortedH = new ArrayList<Integer>(heights);
-        Collections.sort(sortedH);
-        int median = sortedH.isEmpty() ? 0 : sortedH.get(sortedH.size() / 2);
-        List<Word> out = new ArrayList<Word>();
-        for (int i = 0; i < found.size(); i++) if (heights.get(i) * 4 >= median * 3) out.add(found.get(i));
         return out;
     }
 
@@ -142,7 +139,7 @@ public final class Lines {
     /** 발음기호 줄인지: 대괄호·빗금으로 시작하거나 발음기호 글자(æ ə ː 따위)가 들어 있다 */
     private static boolean isPronunciation(String s) {
         String t = s.trim();
-        if (t.startsWith("[") || t.startsWith("/") || t.startsWith("(")) return true;
+        if (t.startsWith("[") || t.startsWith("/") || t.startsWith("(") || t.endsWith("]") || t.endsWith(")")) return true;
         for (int i = 0; i < t.length(); i++) {
             char c = t.charAt(i);
             if ((c >= 0x00C0 && c <= 0x024F) || (c >= 0x0250 && c <= 0x036F) || c == 0x03B8) return true;
@@ -274,7 +271,7 @@ public final class Lines {
         String t = s.replace('\t', ' ').replace('|', ' ');
         t = t.replaceAll("\\[[^\\]]*\\]|/[^/]*/", " ");                 // [ǽpl], /æpl/
         t = t.replaceAll("\\([^\\)\\uAC00-\\uD7A3]*\\)", " ");            // (ǽpl) — 한글이 든 괄호는 뜻이므로 둔다
-        t = t.replaceAll("^[^A-Za-z0-9]{0,6}\\d{2,4}[\\)\\].:]?\\s*(?=[A-Za-z])", "");   // 체크 칸(□ 가 '그'·'ㅁ' 으로 읽힘) + 번호: "그1036 evaluate"
+        t = t.replaceAll("^[^0-9]{0,6}\\d{3,4}[\\)\\].:]?\\s*(?=[A-Za-z])", "");   // 체크 칸(□ 가 '그'·'ㅁ' 으로 읽힘) + 번호: "그1036 evaluate"
         t = t.replaceAll("^\\s*[\\(\\[]?\\d{1,4}[\\)\\].:]?\\s+", "");   // 1.  (2)  03
         t = t.replaceAll("^[\\s□■☐✓✔●○•·\\-*]+", "");
         return t.trim();
@@ -292,7 +289,9 @@ public final class Lines {
     }
 
     static String korean(String s) {
-        String t = s.replaceAll("^[\\s\\.:=\\-–—>~\\)\\]]+", "").replaceAll("[\\s\\.:=\\-–—,;·•]+$", "");
+        String t = s.replaceAll("^[\\s\\.:=\\-–—>~\\)\\]]+", "");
+        t = t.replaceAll("(?<=[\\uAC00-\\uD7A3])\\s*[.．]\\s+(?=[\\uAC00-\\uD7A3])", ", ");     // "보호하다 . 지키다" → 쉼표가 점으로 읽힌 것
+        t = t.replaceAll("[^\\uAC00-\\uD7A3\\)\\]~]+$", "");                                  // 끝에 남은 기호(+ ↔ · 따위)
         return t.replaceAll("\\s+", " ").trim();
     }
 }
