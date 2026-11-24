@@ -258,8 +258,13 @@ adb push tools/ocr_test.png /sdcard/Android/data/$PKG/files/test.png
 start OcrTestActivity;   shot 50_ocr 20
 adb push tools/ocr_test2.jpg /sdcard/Android/data/$PKG/files/test2.jpg
 adb shell am force-stop $PKG
-start OcrTestActivity --es file test2.jpg;   shot 51_ocr_textbook 20
-swipe_up;                shot 52_ocr_textbook_raw 1.5
+start OcrTestActivity --es file test2.jpg --es out out2.txt;   shot 51_ocr_textbook 20
+adb exec-out cat /sdcard/Android/data/$PKG/files/out2.txt > "$OUT/51_ocr_textbook_full.txt"
+# 실제 사진에서 문제가 된 것들(체크 칸, 형광펜, 잘린 예문, 책 이름, 기울어짐)을 넣은 그림
+adb push tools/ocr_test3.jpg /sdcard/Android/data/$PKG/files/test3.jpg
+adb shell am force-stop $PKG
+start OcrTestActivity --es file test3.jpg --es out out3.txt;   shot 52_ocr_photo_like 20
+adb exec-out cat /sdcard/Android/data/$PKG/files/out3.txt > "$OUT/52_ocr_photo_like_full.txt"
 
 # ---- 7) 새 단어장을 저장하면 바로 그 단어장 화면으로, 거기서 문제 풀이로
 seed "$OUT/seed.json"

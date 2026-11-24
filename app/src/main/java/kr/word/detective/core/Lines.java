@@ -28,6 +28,7 @@ public final class Lines {
      *  - 단어와 뜻만 나란히 적힌 목록이면: 줄마다 짝을 찾는다
      */
     public static List<Word> fromBoxes(List<Box> boxes) {
+        lastBoxes = new ArrayList<Box>(boxes);
         List<List<Box>> rows = rows(boxes);
         List<String> lines = new ArrayList<String>();
         for (List<Box> row : rows) {
@@ -90,28 +91,35 @@ public final class Lines {
 
     /** 교재 모양: 왼쪽 칸에서 시작하는 짧은 영어(문제 단어)와, 같은 줄 오른쪽의 한글 뜻 */
     private static List<Word> headwords(List<List<Box>> rows, List<Box> boxes) {
-        int minLeft = Integer.MAX_VALUE, maxRight = 0;
+        List<Integer> lefts = new ArrayList<Integer>();
+        int maxRight = 0;
         for (Box b : boxes) {
-            if (firstHangul(b.text) < 0 && headWord(b.text) == null) continue;    // 숫자·기호만 있는 덩어리는 빼고 잰다
-            minLeft = Math.min(minLeft, b.left);
+            if (firstHangul(b.text) < 0 && !hasLatin(b.text)) continue;    // 숫자·기호만 있는 덩어리는 빼고 잰다
+            lefts.add(b.left);
             maxRight = Math.max(maxRight, b.right);
         }
+        if (lefts.isEmpty()) return new ArrayList<Word>();
+        Collections.sort(lefts);
+        int minLeft = lefts.get(lefts.size() / 10);      // 맨 왼쪽 몇 개(쪽 번호, 잘못 읽힌 얼룩)에 휘둘리지 않게
         int limit = minLeft + (maxRight - minLeft) * 28 / 100;       // 왼쪽 칸의 범위
         List<Word> found = new ArrayList<Word>();
         List<Integer> heights = new ArrayList<Integer>();
         for (List<Box> row : rows) {
             for (int i = 0; i < row.size(); i++) {
                 Box b = row.get(i);
-                if (headWord(b.text) == null && firstHangul(b.text) < 0) continue;   // 번호만 있는 덩어리는 건너뛴다
+                if (!hasLatin(b.text)) {
+                    if (b.left > limit) break;      // 오른쪽 칸에서 시작하는 줄(해석 따위)
+                    continue;                       // 번호, 체크 칸(□ 가 '그'·'ㅁ' 으로 읽히기도 한다)
+                }
                 if (b.left > limit || isPronunciation(b.text)) break;
                 String text = clean(b.text);
                 int[] hw = headWord(text);
                 if (hw == null) break;
                 String en = english(text.substring(hw[0], hw[1]));
                 if (en.isEmpty() || isHeader(en) || en.split(" ").length > 3) break;
-                // 뜻: 같은 덩어리의 나머지 + 오른쪽 덩어리들에서 처음 나오는 한글부터
-                StringBuilder rest = new StringBuilder(text.substring(hw[1]));
-                for (int k = i + 1; k < row.size(); k++) rest.append("  ").append(row.get(k).text);
+                // 뜻: 같은 줄에서 오른쪽 칸에 있는 덩어리들의 처음 한글부터 (왼쪽 칸에 붙어 있는 한글은 쪽 아래 책 이름 따위)
+                StringBuilder rest = new StringBuilder();
+                for (int k = i + 1; k < row.size(); k++) if (row.get(k).left > limit) rest.append("  ").append(row.get(k).text);
                 String ko = meaningOnly(rest.toString());
                 if (!ko.isEmpty()) { found.add(new Word(en, ko)); heights.add(b.bottom - b.top); }
                 break;
@@ -124,6 +132,11 @@ public final class Lines {
         List<Word> out = new ArrayList<Word>();
         for (int i = 0; i < found.size(); i++) if (heights.get(i) * 4 >= median * 3) out.add(found.get(i));
         return out;
+    }
+
+    private static boolean hasLatin(String s) {
+        for (int i = 0; i < s.length(); i++) if (latin(s.charAt(i))) return true;
+        return false;
     }
 
     /** 발음기호 줄인지: 대괄호·빗금으로 시작하거나 발음기호 글자(æ ə ː 따위)가 들어 있다 */
@@ -166,6 +179,7 @@ public final class Lines {
 
     /** 마지막으로 사진에서 모은 줄들 (시험 화면에서 확인용) */
     public static List<String> lastLines = new ArrayList<String>();
+    public static List<Box> lastBoxes = new ArrayList<Box>();
     /** 마지막으로 사진을 어떤 모양으로 보았는지 (시험 화면에서 확인용) */
     public static String lastMode = "";
 
@@ -260,6 +274,7 @@ public final class Lines {
         String t = s.replace('\t', ' ').replace('|', ' ');
         t = t.replaceAll("\\[[^\\]]*\\]|/[^/]*/", " ");                 // [ǽpl], /æpl/
         t = t.replaceAll("\\([^\\)\\uAC00-\\uD7A3]*\\)", " ");            // (ǽpl) — 한글이 든 괄호는 뜻이므로 둔다
+        t = t.replaceAll("^[^A-Za-z0-9]{0,6}\\d{2,4}[\\)\\].:]?\\s*(?=[A-Za-z])", "");   // 체크 칸(□ 가 '그'·'ㅁ' 으로 읽힘) + 번호: "그1036 evaluate"
         t = t.replaceAll("^\\s*[\\(\\[]?\\d{1,4}[\\)\\].:]?\\s+", "");   // 1.  (2)  03
         t = t.replaceAll("^[\\s□■☐✓✔●○•·\\-*]+", "");
         return t.trim();
@@ -277,7 +292,7 @@ public final class Lines {
     }
 
     static String korean(String s) {
-        String t = s.replaceAll("^[\\s\\.:=\\-–—>~\\)\\]]+", "").replaceAll("[\\s\\.:=\\-–—,;]+$", "");
+        String t = s.replaceAll("^[\\s\\.:=\\-–—>~\\)\\]]+", "").replaceAll("[\\s\\.:=\\-–—,;·•]+$", "");
         return t.replaceAll("\\s+", " ").trim();
     }
 }
