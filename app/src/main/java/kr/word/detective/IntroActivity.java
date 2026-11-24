@@ -219,6 +219,12 @@ public class IntroActivity extends Activity {
         loops.add(a);
     }
 
+    /** 같은 그림에 움직임을 이어 붙일 때: 잠시 뒤에 실행한다 (그 사이 장면이 바뀌었으면 하지 않는다) */
+    private void later(long delay, final Runnable r) {
+        final int at = scene;
+        handler.postDelayed(() -> { if (scene == at && !isFinishing()) r.run(); }, delay);
+    }
+
     private void stopLoops() {
         for (Animator a : loops) a.cancel();
         loops.clear();
@@ -243,7 +249,7 @@ public class IntroActivity extends Activity {
     private void go(int n) {
         if (n > last || W == 0) return;
         scene = n;
-        handler.removeCallbacks(auto);
+        handler.removeCallbacksAndMessages(null);
         stopLoops();
         for (View v : new View[] {hero, thief, mom, dog, bubble, bang, card}) { hide(v); v.setTranslationY(0f); }
         for (int i = 0; i < stage.getChildCount(); i++) {       // 별 자리 잡기
@@ -294,10 +300,14 @@ public class IntroActivity extends Activity {
                 walk(mom, 0.44f, 0, 700);
                 shake(dog, 500);
                 above(bubble, dog, 0.60f, "멍멍! 멍!", 600);
-                dash(thief, 1.5f, 2300);
-                dash(dog, 1.4f, 2350);
-                dash(mom, 1.3f, 2400);
-                bubble.animate().alpha(0f).setStartDelay(2300).setDuration(200).start();
+                later(2300, () -> {
+                    stopLoops();
+                    dog.setRotation(0f);
+                    bubble.animate().alpha(0f).setStartDelay(0).setDuration(200).start();
+                    dash(thief, 1.5f, 0);
+                    dash(dog, 1.4f, 60);
+                    dash(mom, 1.3f, 120);
+                });
                 return 4800;
             case 3:
                 caption.setText("괴도아빠가 도전장을 남기고 사라졌다.");
@@ -357,7 +367,7 @@ public class IntroActivity extends Activity {
                 bob(hero, 10, 360, 0);
                 bob(dog, 12, 260, 100);
                 above(bubble, thief, 0.74f, "다음엔 더 꼭꼭 숨겨 주마!", 0);
-                bubble.animate().alpha(0f).setStartDelay(1500).setDuration(300).start();
+                later(1700, () -> bubble.animate().alpha(0f).setStartDelay(0).setDuration(300).start());
                 return 0;
         }
     }
